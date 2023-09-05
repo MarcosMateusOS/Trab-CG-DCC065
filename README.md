@@ -1,1 +1,2 @@
-# Trab-CG-DCC065
+# CG
+Files for the Computer Graphics course in Three.js
