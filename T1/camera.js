@@ -1,6 +1,6 @@
 import * as THREE from "three";
 export default function cameraInit(tamanho, largura, position) {
-  const camera = new THREE.OrthographicCamera(
+  var camera = new THREE.OrthographicCamera(
     largura / -2,
     largura / 2,
     tamanho / 2,
