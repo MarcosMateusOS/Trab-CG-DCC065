@@ -17,9 +17,18 @@ export function checkPlatformCollision(platform, ball, ballVelocity) {
     const maxAngle = Math.PI / 4; // Ângulo máximo de saída
     const angle = maxAngle * collisionX;
 
-    // Aplique a velocidade com base no ângulo de saída
-    const speed = ballVelocity.length(); // Mantém a velocidade original
-    ballVelocity.x = Math.sin(angle) * speed;
-    ballVelocity.y = Math.cos(angle) * speed;
+    // Mantenha a magnitude (comprimento) da velocidade constante após a colisão
+    const currentSpeed = ballVelocity.length();
+    const newVelocity = new THREE.Vector3(
+      Math.sin(angle) * currentSpeed,
+      Math.cos(angle) * Math.abs(currentSpeed), // Garante o eixo Y positivo
+      0
+    );
+
+    // Atribua a nova velocidade à bola
+    ballVelocity.copy(newVelocity);
   }
 }
+
+// Função para verificar colisão da bola com a platforma
+export function checkPlanCollision(leftLimit, rightLimit, ball, ballVelocity) {}
