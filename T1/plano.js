@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export default function planoInit(largura, tamanho, cor) {
-  const planGeo = new THREE.PlaneGeometry(largura, tamanho);
+  let planGeo = new THREE.PlaneGeometry(largura, tamanho);
   let materialPlan = new THREE.MeshBasicMaterial({
     color: cor,
   });

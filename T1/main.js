@@ -26,13 +26,24 @@ let aspect = largura / tamanho;
 let position = new THREE.Vector3(0, 0, 90);
 let yOffset = tamanho * -0.4;
 camera = cameraInit(tamanho, largura, position);
-orbit = new OrbitControls(camera, renderer.domElement);
+// orbit = new OrbitControls(camera, renderer.domElement);
 
 let createdPlan = planoInit(tamanho / 2, tamanho, "black");
 let plan = createdPlan.plan;
 let planGeo = createdPlan.planGeo;
-plan.layers.set(0);
+// plan.layers.set(0);
 scene.add(plan);
+
+
+//
+let secondaryPlan = planoInit(largura,tamanho,"green");
+let auxPlan = secondaryPlan.plan;
+scene.add(auxPlan);
+//
+
+
+
+
 
 // Crie uma barreira branca ao redor do plano
 const wallMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }); // Cor branca
@@ -87,43 +98,46 @@ function animate() {
 
 window.addEventListener("mousemove", onMouseMove, false);
 function onMouseMove(event) {
-  let pointer = new THREE.Vector2();
-  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  let mouse = new THREE.Vector2();
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  raycaster.setFromCamera(pointer, camera);
+  raycaster.setFromCamera(mouse, camera);
 
-  let interception = raycaster.intersectObjects([plan]);
+  let intersects = raycaster.intersectObjects([plan,auxPlan]);
 
-  if (interception.length > 0) {
-    let point = interception[0].point; // Pick the point where interception occurrs
+  if (intersects.length > 0) {
+    let point = intersects[0].point; // Pick the point where intersects occurrs
 
     // Calcula os limites do planoPrimario
-    let leftLimit = wallLeft.position.x + platformWidth / 4 + 0.5;
-    let rightLimit = wallRigth.position.x - platformWidth / 4 + 0.5;
+   // Calcula os limites do planoPrimario
+let leftLimit = wallLeft.position.x + platformWidth / 2 + 5;  // Ajustado aqui
+let rightLimit = wallRigth.position.x - platformWidth / 2 - 5;  // Ajustado aqui
 
-    // Verifica se a posição x da interseção está dentro dos limites
-    if (
-      point.x >= leftLimit + platformWidth / 4 &&
-      point.x <= rightLimit - platformWidth / 4
-    ) {
-      // Move o retângulo para a posição x da interseção
-      platform.position.x = point.x;
-    } else if (point.x < leftLimit + platformWidth / 4) {
-      // Coloca o retângulo no limite à esquerda
-      platform.position.x = leftLimit + platformWidth / 4 + 1;
-    } else if (point.x > rightLimit - platformWidth / 4) {
-      // Coloca o retângulo no limite à direita
-      platform.position.x = rightLimit - platformWidth / 4 + 1;
-    }
+// Verifica se a posição x da interseção está dentro dos limites
+if (
+  point.x >= leftLimit &&  // Ajustado aqui
+  point.x <= rightLimit  // Ajustado aqui
+) {
+  // Move o retângulo para a posição x da interseção
+  platform.position.x = point.x;
+} else if (point.x < leftLimit) {  // Ajustado aqui
+  // Coloca o retângulo no limite à esquerda
+  platform.position.x = leftLimit;  // Ajustado aqui
+} else if (point.x > rightLimit) {  // Ajustado aqui
+  // Coloca o retângulo no limite à direita
+  platform.position.x = rightLimit;  // Ajustado aqui
+}
+
   }
 }
-window.addEventListener(
-  "resize",
-  function () {
-    updateDimensions();
-  },
-  false
-);
+// window.addEventListener(
+//   "resize",
+//   function () {
+//     updateDimensions();
+//   },
+//   false
+// );
 
 // function updateDimensions() {
 //   // Atualizar tamanho e proporção da janela
