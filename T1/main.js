@@ -5,6 +5,8 @@ import cameraInit from "./camera.js";
 import planoInit from "./plano.js";
 import addPlatform from "./platform.js";
 import { checkPlatformCollision } from "./collisions.js";
+import { buildBricks } from "./build.js";
+import { checkBrickCollision, checkPlatformCollision } from "./collisions.js";
 import KeyboardState from "../libs/util/KeyboardState.js";
 import {
   initRenderer,
@@ -64,13 +66,20 @@ let raycaster = new THREE.Raycaster();
 let platformWidth = 100;
 let platformHeight = 10;
 let platform = addPlatform(0, -200, platformWidth, platformHeight, 0x0000ff);
+
 scene.add(platform);
+
+let bricks = buildBricks();
+
+bricks.forEach((brick) => {
+  scene.add(brick);
+});
 
 const ball = new THREE.Mesh(
   new THREE.SphereGeometry(15, 32, 32),
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
 );
-ball.position.set(0, 100, 0);
+ball.position.set(0, 45, 0);
 
 const ballVelocity = new THREE.Vector3(0, -0.2, 0);
 scene.add(ball);
@@ -82,6 +91,7 @@ function animate() {
   ball.position.y += ballVelocity.y;
 
   checkPlatformCollision(platform, ball, ballVelocity);
+  bricks.forEach((brick) => checkBrickCollision(brick, ball, ballVelocity));
   requestAnimationFrame(animate);
 }
 
