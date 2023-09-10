@@ -4,7 +4,7 @@ import GUI from "../libs/util/dat.gui.module.js";
 import cameraInit from "./camera.js";
 import planoInit from "./plano.js";
 import addPlatform from "./platform.js";
-import { checkPlatformCollision } from "./collisions.js";
+import { checkPlatformCollision, checkBordersCollision } from "./collisions.js";
 import KeyboardState from "../libs/util/KeyboardState.js";
 import {
   initRenderer,
@@ -93,7 +93,7 @@ const ball = new THREE.Mesh(
 );
 ball.position.set(0, 100, 0);
 
-const ballVelocity = new THREE.Vector3(0, -0.2, 0);
+const ballVelocity = new THREE.Vector3(0, -0.03, 0);
 scene.add(ball);
 //fim criação bola
 
@@ -106,6 +106,7 @@ function animate() {
   ball.position.y += ballVelocity.y;
 
   checkPlatformCollision(platform, ball, ballVelocity);
+  checkBordersCollision(wallLeft,wallRigth,wallBottom,wallTop,ball, ballVelocity);
   requestAnimationFrame(animate);
 }
 //fim animação  bola
@@ -242,6 +243,7 @@ function pause() {
 function resume() {
   isPaused = false;
   animate();
+  
 }
 
 function resetGame() {
