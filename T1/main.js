@@ -93,7 +93,7 @@ const ball = new THREE.Mesh(
 );
 ball.position.set(0, 100, 0);
 
-const ballVelocity = new THREE.Vector3(0, -0.03, 0);
+const ballVelocity = new THREE.Vector3(0, -3, 0);
 scene.add(ball);
 //fim criação bola
 
@@ -107,7 +107,7 @@ function animate() {
 
   checkPlatformCollision(platform, ball, ballVelocity);
   checkBordersCollision(wallLeft,wallRigth,wallBottom,wallTop,ball, ballVelocity);
-  requestAnimationFrame(animate);
+  
 }
 //fim animação  bola
 
@@ -269,7 +269,8 @@ function keyboardUpdate() {
 render();
 function render() {
   keyboardUpdate();
+  animate();
   requestAnimationFrame(render);
   renderer.render(scene, camera); // Render scene
-  animate();
+  
 }
