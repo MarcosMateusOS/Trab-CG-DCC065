@@ -4,7 +4,9 @@ import GUI from "../libs/util/dat.gui.module.js";
 import cameraInit from "./camera.js";
 import planoInit from "./plano.js";
 import addPlatform from "./platform.js";
-import { checkPlatformCollision, checkBordersCollision } from "./collisions.js";
+import { checkPlatformCollision, checkBordersCollision, checkBrickCollision } from "./collisions.js";
+import { buildBricks } from "./build.js"
+
 import KeyboardState from "../libs/util/KeyboardState.js";
 import {
   initRenderer,
@@ -110,8 +112,7 @@ function animate() {
 
   checkPlatformCollision(platform, ball, ballVelocity);
   checkBordersCollision(wallLeft,wallRigth,wallBottom,wallTop,ball, ballVelocity);
-  
-  
+  bricks.forEach((brick) => checkBrickCollision(brick,ball,ballVelocity));
 }
 //fim animação  bola
 
@@ -300,6 +301,14 @@ function keyboardUpdate() {
 }
 
 //updateDimensions();
+
+let bricks = buildBricks();
+
+bricks.forEach((brick) => {
+  scene.add(brick);
+});
+
+
 
 render();
 function render() {
