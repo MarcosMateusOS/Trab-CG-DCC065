@@ -15,7 +15,7 @@ export function buildBricks() {
 
   level.forEach((row, indexRow) => {
     row.forEach((brick, indexBrick) => {
-    // console.log("first brick number ", indexBrick, " from row ", indexRow);
+      // console.log("first brick number ", indexBrick, " from row ", indexRow);
       if (brick === 1) {
         console.log("is a 1!");
 
@@ -35,7 +35,7 @@ export function buildBricks() {
     });
   });
 
-//   console.log("bricks: ", bricks);
+  //   console.log("bricks: ", bricks);
 
   return bricks;
 }

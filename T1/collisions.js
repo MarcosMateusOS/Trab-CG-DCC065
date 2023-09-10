@@ -25,19 +25,19 @@ export function checkPlatformCollision(platform, ball, ballVelocity) {
       Math.cos(angle) * Math.abs(currentSpeed), // Garante o eixo Y positivo
       0
     );
-    
-    // newVelocity.normalize();
 
-    // // Multiplica pela velocidade original para manter a mesma magnitude
-    // newVelocity.multiplyScalar(currentSpeed);
-
-    // Atribua a nova velocidade à bola
     ballVelocity.copy(newVelocity);
   }
 }
 
-
-export function checkBordersCollision(wallLeft,wallRight,wallBottom,wallTop,ball,ballVelocity){
+export function checkBordersCollision(
+  wallLeft,
+  wallRight,
+  wallBottom,
+  wallTop,
+  ball,
+  ballVelocity
+) {
   const wallLeftBox = new THREE.Box3().setFromObject(wallLeft);
   const ballBox = new THREE.Box3().setFromObject(ball);
   const wallRightBox = new THREE.Box3().setFromObject(wallRight);
@@ -66,13 +66,8 @@ export function checkBordersCollision(wallLeft,wallRight,wallBottom,wallTop,ball
   if (wallBottomBox.intersectsBox(ballBox)) {
     // O vetor normal à parede esquerda é no sentido positivo do eixo X
     // Portanto, inverta a componente x da velocidade da bola
-
   }
-  
-
 }
-
-
 
 // Função para verificar colisão da bola com os tijolos
 export function checkBrickCollision(brick, ball, ballVelocity) {
@@ -105,9 +100,8 @@ export function checkBrickCollision(brick, ball, ballVelocity) {
 
     const brickMin = brickBox.min;
     const brickMax = brickBox.max;
-    const ballMin = ballBox.min; 
+    const ballMin = ballBox.min;
     const ballMax = ballBox.max;
-
 
     const topCollision = Math.abs(brickMax.y - ballMin.y) < 3;
     const bottomCollision = Math.abs(brickMin.y - ballMax.y) < 3;
@@ -116,28 +110,26 @@ export function checkBrickCollision(brick, ball, ballVelocity) {
 
     if (topCollision) {
       console.log("Colisão na parte de cima do tijolo");
-      ballVelocity.y = - ballVelocity.y
+      ballVelocity.y = -ballVelocity.y;
     } else if (bottomCollision) {
       console.log("Colisão na parte de baixo do tijolo");
       // Atualize a velocidade da bola conforme necessário
-      ballVelocity.y = - ballVelocity.y
+      ballVelocity.y = -ballVelocity.y;
     } else if (leftCollision) {
       console.log("Colisão na parte esquerda do tijolo");
       // Atualize a velocidade da bola conforme necessário
-      ballVelocity.x = - ballVelocity.x
-    } else if (rightCollision) {  // Corrigido para 'else if'
+      ballVelocity.x = -ballVelocity.x;
+    } else if (rightCollision) {
+      // Corrigido para 'else if'
       console.log("Colisão na parte direita do tijolo");
       // Atualize a velocidade da bola conforme necessário
-      ballVelocity.x = - ballVelocity.x
+      ballVelocity.x = -ballVelocity.x;
     }
 
     brick.position.set(1000, 1000, 1000);
+    brick.visible = false;
   }
 }
-
-
-
-
 
 // Função para verificar colisão da bola com a platforma
 export function checkPlanCollision(leftLimit, rightLimit, ball, ballVelocity) {}
