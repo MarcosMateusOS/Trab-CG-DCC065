@@ -62,7 +62,11 @@ export function checkBordersCollision(wallLeft,wallRight,wallBottom,wallTop,ball
     ballVelocity.y = -ballVelocity.y;
   }
 
- 
+  if (wallBottomBox.intersectsBox(ballBox)) {
+    // O vetor normal à parede esquerda é no sentido positivo do eixo X
+    // Portanto, inverta a componente x da velocidade da bola
+  }
+  
 
 
 }
