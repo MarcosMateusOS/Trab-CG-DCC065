@@ -80,7 +80,6 @@ const ball = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
 );
 let initialBallPosition = 0.1 * primaryPlan.geometry.parameters.height;
-let initialBallPosition = 0.4 * height;
 ball.position.set(0, initialBallPosition, 0);
 
 let initialBallVelocity = 0.005 * height;
