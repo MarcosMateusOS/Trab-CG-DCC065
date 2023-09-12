@@ -1,14 +1,14 @@
 import * as THREE from "three";
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import GUI from "../libs/util/dat.gui.module.js";
-import cameraInit from "./camera.js";
-import planoInit from "./plano.js";
-import addPlatform from "./platform.js";
+import cameraInit from "./src/camera.js";
+import planoInit from "./src/plano.js";
+import addPlatform from "./src/platform.js";
 import {
   checkPlatformCollision,
   checkBordersCollision,
   checkBrickCollision,
-} from "./collisions.js";
+} from "./src/collisions.js";
 
 import KeyboardState from "../libs/util/KeyboardState.js";
 import {
@@ -90,7 +90,7 @@ scene.add(ball);
 //updateDimensions();
 let bricks;
 function buildBricksPlan() {
-  bricks = buildBricks();
+  bricks = buildBricks(primaryPlan);
 
   bricks.forEach((brick) => {
     scene.add(brick);

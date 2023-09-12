@@ -1,19 +1,19 @@
 import * as THREE from "three";
 
-export default function addBrick(position, color) {
-  const width = 45;
-  const height = 20;
+export default function addBrick(size, position, color) {
+  const width = size;
+  const height = 0.5 * size;
 
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const material = new THREE.MeshBasicMaterial({ color: color });
   const brick = new THREE.Mesh(geometry, material);
+
   brick.position.set(position.x, position.y, 0);
   brick.scale.set(width, height, 1);
 
   return brick;
 }
-
-export function buildBricks() {
+export function buildBricks(plan) {
   const level = [
     [1, 1, 1, 1, 1],
     [1, 1, 1, 1, 1],
@@ -23,27 +23,24 @@ export function buildBricks() {
   const colors = ["#00af27", "#efef00", "#df0000"];
 
   const bricks = [];
-
-  console.log("level: ", level);
+  let planeWidth = plan.geometry.parameters.width;
+  let planeHeight = plan.geometry.parameters.height;
+  let size = 0.15 * planeWidth;
+  let startPositionX = -planeWidth / 2 + 0.11 * planeWidth;
+  let startPositionY = planeHeight / 2 + -0.05 * planeHeight;
+  let spacing = 0.3 * size; // Defina o espaço entre os tijolos aqui
 
   level.forEach((row, indexRow) => {
     row.forEach((brick, indexBrick) => {
-      // console.log("first brick number ", indexBrick, " from row ", indexRow);
       if (brick === 1) {
-        console.log("is a 1!");
-
         let position = {
-          x: indexBrick * 57.5 - 115,
-          y: indexRow * 25 + 35 + 40,
+          x: startPositionX + indexBrick * (size + spacing), // Adicione o espaço aqui
+          y: startPositionY + indexRow * -(0.5 * (size + spacing)), // Adicione o espaço aqui
         };
-
-        // console.log("his position will be: ", position);
 
         let color = colors[indexRow];
 
-        // console.log("and his color, in hex, is ", color);
-
-        bricks.push(addBrick(position, color));
+        bricks.push(addBrick(size, position, color));
       }
     });
   });
