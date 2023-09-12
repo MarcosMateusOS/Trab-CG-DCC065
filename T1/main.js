@@ -39,7 +39,7 @@ camera = cameraInit(height, width, position);
 const { primary, second } = buildWordPlans(scene, width, height);
 
 //Criação plano primário
-var primaryPlanGeometry = new THREE.PlaneGeometry(tamanho/2,tamanho);
+var primaryPlanGeometry = new THREE.PlaneGeometry(height/2,height);
 let primaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0x00afaf });
 let primaryPlan = new THREE.Mesh(primaryPlanGeometry,primaryPlanMaterial);
 // primaryPlan.layers.set(0);
@@ -79,7 +79,7 @@ const ball = new THREE.Mesh(
   new THREE.SphereGeometry(initialBallRadius),
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
 );
-let initialBallPosition = 0.1 * primaryPlan.geometry.parameters.height;
+let initialBallPosition = -0.4 * primaryPlan.geometry.parameters.height;
 ball.position.set(0, initialBallPosition, 0);
 
 let initialBallVelocity = 0.005 * height;
