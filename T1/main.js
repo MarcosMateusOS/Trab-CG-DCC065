@@ -9,7 +9,6 @@ import {
   checkBordersCollision,
   checkBrickCollision,
 } from "./collisions.js";
-import { buildBricks } from "./build.js";
 
 import KeyboardState from "../libs/util/KeyboardState.js";
 import {
@@ -21,60 +20,40 @@ import {
   lightFollowingCamera,
 } from "../libs/util/util.js";
 
+import { buildWordPlans, buildWorldWalls } from "./src/buildWorld.js";
+import { buildBricks } from "./src/bricks.js";
+
 let scene, renderer, camera, light, orbit;
 scene = new THREE.Scene();
 scene.background = new THREE.Color("black"); //0xf0f0f0);
 renderer = initRenderer();
 
-let tamanho = window.innerHeight;
-let largura = window.innerWidth;
-let aspect = largura / tamanho;
+let height = window.innerHeight;
+let width = window.innerWidth;
+let aspect = width / height;
 let position = new THREE.Vector3(0, 0, 90);
-camera = cameraInit(tamanho, largura, position);
-// orbit = new OrbitControls(camera, renderer.domElement);
+camera = cameraInit(height, width, position);
 
-//  Criação plano secundário
-
-var secundaryPlanGeometry = new THREE.PlaneGeometry(largura, tamanho);
-let secundaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-let secundaryPlan = new THREE.Mesh(
-  secundaryPlanGeometry,
-  secundaryPlanMaterial
-);
-scene.add(secundaryPlan);
-//fim criação plano secundário
+const { primary, second } = buildWordPlans(scene, width, height);
 
 //Criação plano primário
-var primaryPlanGeometry = new THREE.PlaneGeometry(tamanho / 2, tamanho);
-let primaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-let primaryPlan = new THREE.Mesh(primaryPlanGeometry, primaryPlanMaterial);
-// primaryPlan.layers.set(0);
-scene.add(primaryPlan);
-//fim criação plano primário
+let primaryPlanGeometry = primary.primaryPlanGeometry;
+let primaryPlan = primary.primaryPlan;
+
+let secundaryPlanGeometry = second.secundaryPlanGeometry;
+let secundaryPlan = second.secundaryPlan;
 
 //Criação de paredes
-const wallMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }); // Cor branca
-var wallTopBottomGeometry = new THREE.PlaneGeometry(
-  tamanho / 2,
-  0.02 * tamanho,
-  0
-);
-let wallTop = new THREE.Mesh(wallTopBottomGeometry, wallMaterial);
-wallTop.position.y = tamanho / 2;
-scene.add(wallTop);
-let wallBottom = new THREE.Mesh(wallTopBottomGeometry, wallMaterial);
-wallBottom.position.y = -tamanho / 2;
-scene.add(wallBottom);
-var wallLeftRigthGeometry = new THREE.PlaneGeometry(0.02 * tamanho, tamanho, 0);
-//Cria as paredes na esquerda e direita
-let wallRigth = new THREE.Mesh(wallLeftRigthGeometry, wallMaterial);
-wallRigth.position.x = tamanho / 4;
-scene.add(wallRigth);
+const { walls, geometry } = buildWorldWalls(scene, height);
 
-let wallLeft = new THREE.Mesh(wallLeftRigthGeometry, wallMaterial);
-wallLeft.position.x = -tamanho / 4;
-scene.add(wallLeft);
-//fim criação paredes.
+let wallTopBottomGeometry = geometry.topBottom;
+let wallLeftRigthGeometry = geometry.leftRigth;
+
+let wallTop = walls.wallTop;
+let wallBottom = walls.wallBottom;
+//Cria as paredes na esquerda e direita
+let wallRigth = walls.wallRigth;
+let wallLeft = walls.wallLeft;
 
 // Criação rebatedor
 let platformWidth = 0.15 * primaryPlanGeometry.parameters.width;
@@ -82,7 +61,7 @@ let platformHeight = 0.025 * primaryPlanGeometry.parameters.height;
 var platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
 let platformMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 let platform = new THREE.Mesh(platformGeometry, platformMaterial);
-let yOffset = tamanho * -0.4;
+let yOffset = height * -0.4;
 platform.position.set(0, yOffset, 0.0);
 
 scene.add(platform);
@@ -94,10 +73,10 @@ const ball = new THREE.Mesh(
   new THREE.SphereGeometry(initialBallRadius),
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
 );
-let initialBallPosition = 0.4 * tamanho;
+let initialBallPosition = 0.4 * height;
 ball.position.set(0, initialBallPosition, 0);
 
-let initialBallVelocity = 0.005 * tamanho;
+let initialBallVelocity = 0.005 * height;
 const ballVelocity = new THREE.Vector3(0, initialBallVelocity, 0);
 scene.add(ball);
 //fim criação bola
@@ -202,23 +181,23 @@ window.addEventListener(
 );
 
 function updateDimensions() {
-  // Atualizar tamanho e proporção da janela
-  largura = window.innerWidth;
-  tamanho = window.innerHeight;
-  aspect = largura / tamanho;
-  //fim atualizar tamanho e proporção
+  // Atualizar height e proporção da janela
+  width = window.innerWidth;
+  height = window.innerHeight;
+  aspect = width / height;
+  //fim atualizar height e proporção
 
   // Atualizar câmera
-  camera.left = largura / -2;
-  camera.right = largura / 2;
-  camera.top = tamanho / 2;
-  camera.bottom = tamanho / -2;
+  camera.left = width / -2;
+  camera.right = width / 2;
+  camera.top = height / 2;
+  camera.bottom = height / -2;
   camera.updateProjectionMatrix();
   //fim atualizar câmera
 
   // Atualizar plano secundário
   secundaryPlanGeometry.dispose();
-  secundaryPlanGeometry = new THREE.PlaneGeometry(largura, tamanho);
+  secundaryPlanGeometry = new THREE.PlaneGeometry(width, height);
   secundaryPlan.geometry = secundaryPlanGeometry;
   //fim atualizar plano secundário
 
@@ -227,7 +206,7 @@ function updateDimensions() {
   let oldHeight = primaryPlanGeometry.parameters.height;
 
   primaryPlanGeometry.dispose();
-  primaryPlanGeometry = new THREE.PlaneGeometry(tamanho / 2, tamanho);
+  primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
 
   let newWidth = primaryPlanGeometry.parameters.width;
   let newHeight = primaryPlanGeometry.parameters.height;
@@ -241,34 +220,30 @@ function updateDimensions() {
   platform.geometry.dispose();
   platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
   platform.geometry = platformGeometry;
-  yOffset = tamanho * -0.4;
+  yOffset = height * -0.4;
   platform.position.set(0, yOffset, 0.0);
   //fim atualizar plataforma
 
   // Atualizar barras
   wallTop.geometry.dispose();
   wallBottom.geometry.dispose();
-  let wallTopBottomGeometry = new THREE.BoxGeometry(
+  wallTopBottomGeometry = new THREE.BoxGeometry(
     primaryPlanGeometry.parameters.width,
-    0.05 * tamanho,
+    0.05 * height,
     0
   );
   wallTop.geometry = wallTopBottomGeometry;
   wallBottom.geometry = wallTopBottomGeometry;
-  wallTop.position.y = tamanho / 2;
-  wallBottom.position.y = -tamanho / 2;
+  wallTop.position.y = height / 2;
+  wallBottom.position.y = -height / 2;
 
   wallLeft.geometry.dispose();
   wallRigth.geometry.dispose();
-  let wallLeftRigthGeometry = new THREE.BoxGeometry(
-    0.025 * tamanho,
-    tamanho,
-    0
-  );
+  wallLeftRigthGeometry = new THREE.BoxGeometry(0.025 * height, height, 0);
   wallLeft.geometry = wallLeftRigthGeometry;
   wallRigth.geometry = wallLeftRigthGeometry;
-  wallLeft.position.x = -tamanho / 4;
-  wallRigth.position.x = tamanho / 4;
+  wallLeft.position.x = -height / 4;
+  wallRigth.position.x = height / 4;
   //fim atualizar barras
 
   // Atualizar bolinha
@@ -276,13 +251,13 @@ function updateDimensions() {
   ball.geometry.dispose();
   let ballGeometry = new THREE.SphereGeometry(newBallRadius);
   ball.geometry = ballGeometry;
-  let newBallVelocity = 0.005 * tamanho;
+  let newBallVelocity = 0.005 * height;
   ballVelocity.normalize();
   ballVelocity.multiplyScalar(newBallVelocity);
-  let proporcaoTamanho = newWidth / oldWidth;
-  let proporcaoLargura = newHeight / oldHeight;
-  ball.position.x *= proporcaoLargura;
-  ball.position.y *= proporcaoTamanho;
+  let proporcaoheight = newWidth / oldWidth;
+  let proporcaowidth = newHeight / oldHeight;
+  ball.position.x *= proporcaowidth;
+  ball.position.y *= proporcaoheight;
 
   scene.add(ball);
   //fim atualizar bolinha
@@ -292,7 +267,7 @@ function updateDimensions() {
   //fim atualizar tijolos
 
   // Atualizar renderer
-  renderer.setSize(largura, tamanho);
+  renderer.setSize(width, height);
 }
 
 updateDimensions();
@@ -309,7 +284,6 @@ function resume() {
 }
 
 function resetGame() {
-  console.log(resetGame);
   platform.position.set(0, yOffset, 0.0);
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
   ball.position.set(0, initialBallPosition, 0);
