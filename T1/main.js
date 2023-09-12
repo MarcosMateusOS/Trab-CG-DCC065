@@ -39,9 +39,9 @@ camera = cameraInit(height, width, position);
 const { primary, second } = buildWordPlans(scene, width, height);
 
 //Criação plano primário
-var primaryPlanGeometry = new THREE.PlaneGeometry(height/2,height);
+var primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
 let primaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0x00afaf });
-let primaryPlan = new THREE.Mesh(primaryPlanGeometry,primaryPlanMaterial);
+let primaryPlan = new THREE.Mesh(primaryPlanGeometry, primaryPlanMaterial);
 // primaryPlan.layers.set(0);
 scene.add(primaryPlan);
 //fim criação plano primário
@@ -79,7 +79,7 @@ const ball = new THREE.Mesh(
   new THREE.SphereGeometry(initialBallRadius),
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
 );
-let initialBallPosition = -0.4 * primaryPlan.geometry.parameters.height;
+let initialBallPosition = -0.3 * primaryPlan.geometry.parameters.height;
 ball.position.set(0, initialBallPosition, 0);
 
 let initialBallVelocity = 0.005 * height;
@@ -118,12 +118,24 @@ function animate() {
   ball.position.y += ballVelocity.y;
 
   checkPlatformCollision(platform, ball, ballVelocity);
-  checkBordersCollision(wallLeft,wallRigth,wallBottom,wallTop,ball, ballVelocity);
-  bricks.forEach((brick) => checkBrickCollision(brick,ball,ballVelocity, count));
+  checkBordersCollision(
+    wallLeft,
+    wallRigth,
+    wallBottom,
+    wallTop,
+    ball,
+    ballVelocity
+  );
+  bricks.forEach((brick) =>
+    checkBrickCollision(brick, ball, ballVelocity, count)
+  );
 
-  console.log("score: ", count.score)
+  console.log("score: ", count.score);
 
-  if(count.score === 15) {count.score = 0; resetGame()};
+  if (count.score === 15) {
+    count.score = 0;
+    pause();
+  }
 }
 //fim animação  bola
 
@@ -293,6 +305,9 @@ function resetGame() {
   removeBricks();
   bricks = [];
   buildBricksPlan();
+  if (isPaused) {
+    resume();
+  }
 }
 
 var keyboard = new KeyboardState();
@@ -301,12 +316,17 @@ function keyboardUpdate() {
   keyboard.update();
 
   if (keyboard.down("R")) resetGame();
-  if (keyboard.down("space")) pause();
-  if (keyboard.down("enter")) resume();
+  if (keyboard.down("space")) {
+    if (!isPaused) {
+      pause();
+    } else {
+      resume();
+    }
+  }
+  // if (keyboard.down("enter")) resume();
 }
 
 //updateDimensions();
-
 
 render();
 function render() {
