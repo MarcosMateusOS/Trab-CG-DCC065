@@ -23,6 +23,8 @@ import {
 import { buildWordPlans, buildWorldWalls } from "./src/buildWorld.js";
 import { buildBricks } from "./src/bricks.js";
 
+var count = { score: 0 };
+
 let scene, renderer, camera, light, orbit;
 scene = new THREE.Scene();
 scene.background = new THREE.Color("black"); //0xf0f0f0);
@@ -37,8 +39,12 @@ camera = cameraInit(height, width, position);
 const { primary, second } = buildWordPlans(scene, width, height);
 
 //Criação plano primário
-let primaryPlanGeometry = primary.primaryPlanGeometry;
-let primaryPlan = primary.primaryPlan;
+var primaryPlanGeometry = new THREE.PlaneGeometry(tamanho/2,tamanho);
+let primaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0x00afaf });
+let primaryPlan = new THREE.Mesh(primaryPlanGeometry,primaryPlanMaterial);
+// primaryPlan.layers.set(0);
+scene.add(primaryPlan);
+//fim criação plano primário
 
 let secundaryPlanGeometry = second.secundaryPlanGeometry;
 let secundaryPlan = second.secundaryPlan;
@@ -112,15 +118,12 @@ function animate() {
   ball.position.y += ballVelocity.y;
 
   checkPlatformCollision(platform, ball, ballVelocity);
-  checkBordersCollision(
-    wallLeft,
-    wallRigth,
-    wallBottom,
-    wallTop,
-    ball,
-    ballVelocity
-  );
-  bricks.forEach((brick) => checkBrickCollision(brick, ball, ballVelocity));
+  checkBordersCollision(wallLeft,wallRigth,wallBottom,wallTop,ball, ballVelocity);
+  bricks.forEach((brick) => checkBrickCollision(brick,ball,ballVelocity, count));
+
+  console.log("score: ", count.score)
+
+  if(count.score === 15) {count.score = 0; resetGame()};
 }
 //fim animação  bola
 

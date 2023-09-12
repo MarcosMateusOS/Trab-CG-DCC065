@@ -70,7 +70,7 @@ export function checkBordersCollision(
 }
 
 // Função para verificar colisão da bola com os tijolos
-export function checkBrickCollision(brick, ball, ballVelocity) {
+export function checkBrickCollision(brick, ball, ballVelocity, count) {
   const brickBox = new THREE.Box3().setFromObject(brick);
   const ballBox = new THREE.Box3().setFromObject(ball);
 
@@ -127,9 +127,11 @@ export function checkBrickCollision(brick, ball, ballVelocity) {
     }
 
     brick.position.set(1000, 1000, 1000);
+
     brick.visible = false;
+
+    count.score++;
+    console.log("iscore: ", count)
   }
 }
 
-// Função para verificar colisão da bola com a platforma
-export function checkPlanCollision(leftLimit, rightLimit, ball, ballVelocity) {}
