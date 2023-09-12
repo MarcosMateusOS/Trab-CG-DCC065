@@ -1,12 +1,15 @@
 import * as THREE from "three";
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import GUI from "../libs/util/dat.gui.module.js";
-import cameraInit from "./camera.js";
-import planoInit from "./plano.js";
-import addPlatform from "./platform.js";
-import { checkPlatformCollision } from "./collisions.js";
-import { buildBricks } from "./build.js";
-import { checkBrickCollision, checkPlatformCollision } from "./collisions.js";
+import cameraInit from "./src/camera.js";
+import planoInit from "./src/plano.js";
+import addPlatform from "./src/platform.js";
+import {
+  checkPlatformCollision,
+  checkBordersCollision,
+  checkBrickCollision,
+} from "./src/collisions.js";
+
 import KeyboardState from "../libs/util/KeyboardState.js";
 import {
   initRenderer,
@@ -17,73 +20,97 @@ import {
   lightFollowingCamera,
 } from "../libs/util/util.js";
 
+import { buildWordPlans, buildWorldWalls } from "./src/buildWorld.js";
+import { buildBricks } from "./src/bricks.js";
+
+var count = { score: 0 };
+
 let scene, renderer, camera, light, orbit;
 scene = new THREE.Scene();
 scene.background = new THREE.Color("black"); //0xf0f0f0);
 renderer = initRenderer();
 
-let tamanho = window.innerHeight;
-let largura = window.innerWidth;
-let aspect = largura / tamanho;
+let height = window.innerHeight;
+let width = window.innerWidth;
+let aspect = width / height;
 let position = new THREE.Vector3(0, 0, 90);
-let yOffset = tamanho * -0.4;
-camera = cameraInit(tamanho, largura, position);
-orbit = new OrbitControls(camera, renderer.domElement);
+camera = cameraInit(height, width, position);
 
-let createdPlan = planoInit(tamanho / 2, tamanho, "black");
-let plan = createdPlan.plan;
-let planGeo = createdPlan.planGeo;
-plan.layers.set(0);
-scene.add(plan);
+const { primary, second } = buildWordPlans(scene, width, height);
 
-// Crie uma barreira branca ao redor do plano
-const wallMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }); // Cor branca
-const wallTopBottom = new THREE.BoxGeometry(tamanho / 2, 10, 0);
+//Criação plano primário
+var primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
+let primaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0x00afaf });
+let primaryPlan = new THREE.Mesh(primaryPlanGeometry, primaryPlanMaterial);
+// primaryPlan.layers.set(0);
+scene.add(primaryPlan);
+//fim criação plano primário
 
-//Cria as paredes em cima e baixo
-let wallTop = new THREE.Mesh(wallTopBottom, wallMaterial);
-wallTop.position.y = tamanho / 2 + 0.5;
-scene.add(wallTop);
+let secundaryPlanGeometry = second.secundaryPlanGeometry;
+let secundaryPlan = second.secundaryPlan;
 
-let wallBottom = new THREE.Mesh(wallTopBottom, wallMaterial);
-wallBottom.position.y = -tamanho / 2 + 0.5;
-scene.add(wallBottom);
+//Criação de paredes
+const { walls, geometry } = buildWorldWalls(scene, height);
 
-const wallLeftRigth = new THREE.BoxGeometry(10, tamanho, 0);
+let wallTopBottomGeometry = geometry.topBottom;
+let wallLeftRigthGeometry = geometry.leftRigth;
 
+let wallTop = walls.wallTop;
+let wallBottom = walls.wallBottom;
 //Cria as paredes na esquerda e direita
-let wallRigth = new THREE.Mesh(wallLeftRigth, wallMaterial);
-wallRigth.position.x = tamanho / 4 + 0.5;
-scene.add(wallRigth);
+let wallRigth = walls.wallRigth;
+let wallLeft = walls.wallLeft;
 
-let wallLeft = new THREE.Mesh(wallLeftRigth, wallMaterial);
-wallLeft.position.x = -tamanho / 4 + 0.5;
-scene.add(wallLeft);
-
-// -- Create raycaster
-let raycaster = new THREE.Raycaster();
-
-let platformWidth = 100;
-let platformHeight = 10;
-let platform = addPlatform(0, -200, platformWidth, platformHeight, 0x0000ff);
+// Criação rebatedor
+let platformWidth = 0.15 * primaryPlanGeometry.parameters.width;
+let platformHeight = 0.025 * primaryPlanGeometry.parameters.height;
+var platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
+let platformMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+let platform = new THREE.Mesh(platformGeometry, platformMaterial);
+let yOffset = height * -0.4;
+platform.position.set(0, yOffset, 0.0);
 
 scene.add(platform);
+//fim criação rebatedor
 
-let bricks = buildBricks();
-
-bricks.forEach((brick) => {
-  scene.add(brick);
-});
-
+// criação bola
+let initialBallRadius = 0.01 * primaryPlanGeometry.parameters.width;
 const ball = new THREE.Mesh(
-  new THREE.SphereGeometry(15, 32, 32),
+  new THREE.SphereGeometry(initialBallRadius),
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
 );
-ball.position.set(0, 45, 0);
+let initialBallPosition = -0.3 * primaryPlan.geometry.parameters.height;
+ball.position.set(0, initialBallPosition, 0);
 
-const ballVelocity = new THREE.Vector3(0, -0.2, 0);
+let initialBallVelocity = 0.005 * height;
+const ballVelocity = new THREE.Vector3(0, -initialBallVelocity, 0);
 scene.add(ball);
+//fim criação bola
 
+//updateDimensions();
+let bricks;
+function buildBricksPlan() {
+  bricks = buildBricks(primaryPlan);
+
+  bricks.forEach((brick) => {
+    scene.add(brick);
+  });
+}
+
+function removeBricks() {
+  console.log("removeBricks");
+  bricks.forEach((brick) => {
+    const object = scene.getObjectByProperty("uuid", brick.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
+    object.geometry.dispose();
+    object.material.dispose();
+    console.log(object);
+    scene.remove(object); // disposing and deleting mesh from scene
+  });
+}
+
+buildBricksPlan();
+
+// animação bola
 function animate() {
   if (isPaused) return;
 
@@ -91,42 +118,79 @@ function animate() {
   ball.position.y += ballVelocity.y;
 
   checkPlatformCollision(platform, ball, ballVelocity);
-  bricks.forEach((brick) => checkBrickCollision(brick, ball, ballVelocity));
-  requestAnimationFrame(animate);
+  const isLose = checkBordersCollision(
+    wallLeft,
+    wallRigth,
+    wallBottom,
+    wallTop,
+    ball,
+    ballVelocity
+  );
+
+  if (isLose) {
+    resetGame();
+  }
+  bricks.forEach((brick) =>
+    checkBrickCollision(brick, ball, ballVelocity, count)
+  );
+
+  console.log("score: ", count.score);
+
+  if (count.score === 15) {
+    count.score = 0;
+    pause();
+  }
 }
+//fim animação  bola
+
+// Criação Raycaster
+let raycaster = new THREE.Raycaster();
 
 window.addEventListener("mousemove", onMouseMove, false);
 function onMouseMove(event) {
-  let pointer = new THREE.Vector2();
-  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  if (!isPaused) {
+    let mouse = new THREE.Vector2();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  raycaster.setFromCamera(pointer, camera);
+    raycaster.setFromCamera(mouse, camera);
 
-  let interception = raycaster.intersectObjects([plan]);
+    let intersects = raycaster.intersectObjects([primaryPlan, secundaryPlan]);
 
-  if (interception.length > 0) {
-    let point = interception[0].point; // Pick the point where interception occurrs
+    if (intersects.length > 0) {
+      let point = intersects[0].point; // Pick the point where intersects occurrs
 
-    // Calcula os limites do planoPrimario
-    let leftLimit = wallLeft.position.x + platformWidth / 4 + 0.5;
-    let rightLimit = wallRigth.position.x - platformWidth / 4 + 0.5;
+      // Calcula os limites do planoPrimario
+      let borderLeftSize = wallLeft.geometry.parameters.width;
+      let borderRightSize = wallRigth.geometry.parameters.width;
 
-    // Verifica se a posição x da interseção está dentro dos limites
-    if (
-      point.x >= leftLimit + platformWidth / 4 &&
-      point.x <= rightLimit - platformWidth / 4
-    ) {
-      // Move o retângulo para a posição x da interseção
-      platform.position.x = point.x;
-    } else if (point.x < leftLimit + platformWidth / 4) {
-      // Coloca o retângulo no limite à esquerda
-      platform.position.x = leftLimit + platformWidth / 4 + 1;
-    } else if (point.x > rightLimit - platformWidth / 4) {
-      // Coloca o retângulo no limite à direita
-      platform.position.x = rightLimit - platformWidth / 4 + 1;
+      let leftLimit =
+        wallLeft.position.x + platformWidth / 2 + borderLeftSize / 2; // Ajustado aqui
+      let rightLimit =
+        wallRigth.position.x - platformWidth / 2 - borderRightSize / 2; // Ajustado aqui
+
+      // Verifica se a posição x da interseção está dentro dos limites
+      if (
+        point.x >= leftLimit && // Ajustado aqui
+        point.x <= rightLimit // Ajustado aqui
+      ) {
+        // Move o retângulo para a posição x da interseção
+        platform.position.x = point.x;
+      } else if (point.x < leftLimit) {
+        // Ajustado aqui
+        // Coloca o retângulo no limite à esquerda
+        platform.position.x = leftLimit; // Ajustado aqui
+      } else if (point.x > rightLimit) {
+        // Ajustado aqui
+        // Coloca o retângulo no limite à direita
+        platform.position.x = rightLimit; // Ajustado aqui
+      }
     }
   }
 }
+
+//fim criação Raycaster
+
 window.addEventListener(
   "resize",
   function () {
@@ -135,58 +199,132 @@ window.addEventListener(
   false
 );
 
-// function updateDimensions() {
-//   // Atualizar tamanho e proporção da janela
-//   largura = window.innerWidth;
-//   tamanho = window.innerHeight;
-//   aspect = largura / tamanho;
+function updateDimensions() {
+  // Atualizar height e proporção da janela
+  width = window.innerWidth;
+  height = window.innerHeight;
+  aspect = width / height;
+  //fim atualizar height e proporção
 
-//   // Atualizar câmera
-//   camera.left = largura / -2;
-//   camera.right = largura / 2;
-//   camera.top = tamanho / 2;
-//   camera.bottom = tamanho / -2;
-//   camera.updateProjectionMatrix();
+  // Atualizar câmera
+  camera.left = width / -2;
+  camera.right = width / 2;
+  camera.top = height / 2;
+  camera.bottom = height / -2;
+  camera.updateProjectionMatrix();
+  //fim atualizar câmera
 
-//   // Atualizar plano secundário
-//   planGeo.dispose();
-//   planGeo = new THREE.PlaneGeometry(largura, tamanho);
-//   planGeo.geometry = planGeo;
+  // Atualizar plano secundário
+  secundaryPlanGeometry.dispose();
+  secundaryPlanGeometry = new THREE.PlaneGeometry(width, height);
+  secundaryPlan.geometry = secundaryPlanGeometry;
+  //fim atualizar plano secundário
 
-//   yOffset = tamanho * -0.4;
-//   platform.position.set(0, yOffset, 0.0);
+  // Atualizar plano primário
+  let oldWidth = primaryPlanGeometry.parameters.width;
+  let oldHeight = primaryPlanGeometry.parameters.height;
 
-//   // Atualizar renderer
-//   renderer.setSize(largura, tamanho);
-// }
+  primaryPlanGeometry.dispose();
+  primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
+
+  let newWidth = primaryPlanGeometry.parameters.width;
+  let newHeight = primaryPlanGeometry.parameters.height;
+
+  primaryPlan.geometry = primaryPlanGeometry;
+  //fim atualizar plano primário
+
+  // Atualizar plataforma
+  platformWidth = primaryPlanGeometry.parameters.width * 0.225;
+  platformHeight = primaryPlanGeometry.parameters.height * 0.025;
+  platform.geometry.dispose();
+  platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
+  platform.geometry = platformGeometry;
+  yOffset = height * -0.4;
+  platform.position.set(0, yOffset, 0.0);
+  //fim atualizar plataforma
+
+  // Atualizar barras
+  wallTop.geometry.dispose();
+  wallBottom.geometry.dispose();
+  wallTopBottomGeometry = new THREE.BoxGeometry(
+    primaryPlanGeometry.parameters.width,
+    0.05 * height,
+    0
+  );
+  wallTop.geometry = wallTopBottomGeometry;
+  wallBottom.geometry = wallTopBottomGeometry;
+  wallTop.position.y = height / 2;
+  wallBottom.position.y = -height / 2;
+
+  wallLeft.geometry.dispose();
+  wallRigth.geometry.dispose();
+  wallLeftRigthGeometry = new THREE.BoxGeometry(0.025 * height, height, 0);
+  wallLeft.geometry = wallLeftRigthGeometry;
+  wallRigth.geometry = wallLeftRigthGeometry;
+  wallLeft.position.x = -height / 4;
+  wallRigth.position.x = height / 4;
+  //fim atualizar barras
+
+  // Atualizar bolinha
+  let newBallRadius = 0.03 * primaryPlanGeometry.parameters.width;
+  ball.geometry.dispose();
+  let ballGeometry = new THREE.SphereGeometry(newBallRadius);
+  ball.geometry = ballGeometry;
+  let newBallVelocity = 0.005 * height;
+  ballVelocity.normalize();
+  ballVelocity.multiplyScalar(newBallVelocity);
+  let proporcaoheight = newWidth / oldWidth;
+  let proporcaowidth = newHeight / oldHeight;
+  ball.position.x *= proporcaowidth;
+  ball.position.y *= proporcaoheight;
+
+  scene.add(ball);
+
+  renderer.setSize(width, height);
+}
+
+updateDimensions();
 
 let isPaused = false;
+let isResume = true;
 
 function pause() {
   isPaused = true;
+  isResume = console.log(isPaused);
 }
 
 function resume() {
   isPaused = false;
+  console.log(isPaused);
   animate();
 }
 
 function resetGame() {
-  ball.position.set(0, 100, 0);
-  platform.position.set(0, -200, 0);
-
-  ballVelocity.set(0, 0, 0);
-  const defaultVelocity = new THREE.Vector3(0, -0.2, 0);
-  ballVelocity.copy(defaultVelocity);
+  platform.position.set(0, yOffset, 0.0);
+  ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
+  ball.position.set(0, initialBallPosition, 0);
+  removeBricks();
+  bricks = [];
+  buildBricksPlan();
+  if (isPaused) {
+    resume();
+  }
 }
+
 var keyboard = new KeyboardState();
 
 function keyboardUpdate() {
   keyboard.update();
 
   if (keyboard.down("R")) resetGame();
-  if (keyboard.down("space")) pause();
-  if (keyboard.down("enter")) resume();
+  if (keyboard.down("space")) {
+    if (!isPaused) {
+      pause();
+    } else {
+      resume();
+    }
+  }
+  // if (keyboard.down("enter")) resume();
 }
 
 //updateDimensions();
@@ -194,7 +332,7 @@ function keyboardUpdate() {
 render();
 function render() {
   keyboardUpdate();
+  animate();
   requestAnimationFrame(render);
   renderer.render(scene, camera); // Render scene
-  animate();
 }
