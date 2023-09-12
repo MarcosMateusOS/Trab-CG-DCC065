@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import GUI from "../libs/util/dat.gui.module.js";
 import cameraInit from "./src/camera.js";
-import planoInit from "./src/plano.js";
+
 import addPlatform from "./src/platform.js";
 import {
   checkPlatformCollision,
@@ -11,21 +11,14 @@ import {
 } from "./src/collisions.js";
 
 import KeyboardState from "../libs/util/KeyboardState.js";
-import {
-  initRenderer,
-  initCamera,
-  initDefaultBasicLight,
-  SecondaryBox,
-  onWindowResize,
-  lightFollowingCamera,
-} from "../libs/util/util.js";
+import { initRenderer } from "../libs/util/util.js";
 
 import { buildWordPlans, buildWorldWalls } from "./src/buildWorld.js";
 import { buildBricks } from "./src/bricks.js";
 
 var count = { score: 0 };
 
-let scene, renderer, camera, light, orbit;
+let scene, renderer, camera;
 scene = new THREE.Scene();
 scene.background = new THREE.Color("black"); //0xf0f0f0);
 renderer = initRenderer();
@@ -312,6 +305,17 @@ function resetGame() {
 }
 
 var keyboard = new KeyboardState();
+let isFullScreen = false;
+function fullScreen() {
+  let element = document.documentElement;
+  if (!isFullScreen) {
+    element.requestFullscreen();
+    isFullScreen = true;
+  } else {
+    document.exitFullscreen();
+    isFullScreen = false;
+  }
+}
 
 function keyboardUpdate() {
   keyboard.update();
@@ -324,6 +328,8 @@ function keyboardUpdate() {
       resume();
     }
   }
+
+  if (keyboard.down("enter")) fullScreen();
   // if (keyboard.down("enter")) resume();
 }
 
