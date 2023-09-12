@@ -73,11 +73,14 @@ const ball = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
 );
 let initialBallPosition = -0.3 * primaryPlan.geometry.parameters.height;
-ball.position.set(0, initialBallPosition, 0);
+ball.position.set(0, yOffset, 0);
+platform.add(ball);
+
+let start = false;
 
 let initialBallVelocity = 0.005 * height;
 const ballVelocity = new THREE.Vector3(0, -initialBallVelocity, 0);
-scene.add(ball);
+
 //fim criação bola
 
 //updateDimensions();
@@ -107,31 +110,33 @@ buildBricksPlan();
 function animate() {
   if (isPaused) return;
 
-  ball.position.x += ballVelocity.x;
-  ball.position.y += ballVelocity.y;
+  if (start) {
+    ball.position.x += ballVelocity.x;
+    ball.position.y += ballVelocity.y;
 
-  checkPlatformCollision(platform, ball, ballVelocity);
-  const isLose = checkBordersCollision(
-    wallLeft,
-    wallRigth,
-    wallBottom,
-    wallTop,
-    ball,
-    ballVelocity
-  );
+    checkPlatformCollision(platform, ball, ballVelocity);
+    const isLose = checkBordersCollision(
+      wallLeft,
+      wallRigth,
+      wallBottom,
+      wallTop,
+      ball,
+      ballVelocity
+    );
 
-  if (isLose) {
-    resetGame();
-  }
-  bricks.forEach((brick) =>
-    checkBrickCollision(brick, ball, ballVelocity, count)
-  );
+    if (isLose) {
+      resetGame();
+    }
+    bricks.forEach((brick) =>
+      checkBrickCollision(brick, ball, ballVelocity, count)
+    );
 
-  console.log("score: ", count.score);
+    console.log("score: ", count.score);
 
-  if (count.score === 15) {
-    count.score = 0;
-    pause();
+    if (count.score === 15) {
+      count.score = 0;
+      pause();
+    }
   }
 }
 //fim animação  bola
@@ -169,14 +174,24 @@ function onMouseMove(event) {
       ) {
         // Move o retângulo para a posição x da interseção
         platform.position.x = point.x;
+
+        if (!start) {
+          ball.position.x = point.x;
+        }
       } else if (point.x < leftLimit) {
         // Ajustado aqui
         // Coloca o retângulo no limite à esquerda
         platform.position.x = leftLimit; // Ajustado aqui
+        if (!start) {
+          ball.position.x = leftLimit;
+        }
       } else if (point.x > rightLimit) {
         // Ajustado aqui
         // Coloca o retângulo no limite à direita
         platform.position.x = rightLimit; // Ajustado aqui
+        if (!start) {
+          ball.position.x = rightLimit; // Ajustado aqui
+        }
       }
     }
   }
@@ -293,9 +308,10 @@ function resume() {
 }
 
 function resetGame() {
+  start = false;
   platform.position.set(0, yOffset, 0.0);
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
-  ball.position.set(0, initialBallPosition, 0);
+  ball.position.set(0, yOffset, 0);
   removeBricks();
   bricks = [];
   buildBricksPlan();
@@ -330,6 +346,7 @@ function keyboardUpdate() {
   }
 
   if (keyboard.down("enter")) fullScreen();
+  if (keyboard.down("Q")) start = true;
   // if (keyboard.down("enter")) resume();
 }
 
