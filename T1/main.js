@@ -79,11 +79,12 @@ const ball = new THREE.Mesh(
   new THREE.SphereGeometry(initialBallRadius),
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
 );
+let initialBallPosition = 0.1 * primaryPlan.geometry.parameters.height;
 let initialBallPosition = 0.4 * height;
 ball.position.set(0, initialBallPosition, 0);
 
 let initialBallVelocity = 0.005 * height;
-const ballVelocity = new THREE.Vector3(0, initialBallVelocity, 0);
+const ballVelocity = new THREE.Vector3(0, -initialBallVelocity, 0);
 scene.add(ball);
 //fim criação bola
 
@@ -304,6 +305,9 @@ function keyboardUpdate() {
   if (keyboard.down("space")) pause();
   if (keyboard.down("enter")) resume();
 }
+
+//updateDimensions();
+
 
 render();
 function render() {

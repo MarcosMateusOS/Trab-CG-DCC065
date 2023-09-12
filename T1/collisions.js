@@ -75,29 +75,6 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
   const ballBox = new THREE.Box3().setFromObject(ball);
 
   if (brickBox.intersectsBox(ballBox)) {
-    // Calcule a posição relativa da colisão na platforma (-1 a 1, onde -1 é à esquerda e 1 é à direita)
-    // const collisionPoint = new THREE.Vector3().copy(ball.position);
-    // console.log("ponto de colisão! ", collisionPoint);
-
-    // brick.worldToLocal(collisionPoint);
-    // const collisionX = collisionPoint.x / (brick.geometry.parameters.width / 2);
-
-    // // console.log("colisão X é o ", collisionX);
-
-    // // Calcule o ângulo de saída com base na posição da colisão
-    // const maxAngle = Math.PI / 4; // Ângulo máximo de saída
-    // const angle = maxAngle * collisionX;
-
-    // // console.log("angle: ", angle);
-
-    // // Mantenha a magnitude (comprimento) da velocidade constante após a colisão
-    // const currentSpeed = ballVelocity.length();
-    // const newVelocity = new THREE.Vector3(
-    //   Math.sin(angle) * currentSpeed,
-    //   -(Math.cos(angle) * Math.abs(currentSpeed)), // Garante o eixo Y positivo
-    //   0
-    // );
-
     const brickMin = brickBox.min;
     const brickMax = brickBox.max;
     const ballMin = ballBox.min;
@@ -123,7 +100,7 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
       // Corrigido para 'else if'
       console.log("Colisão na parte direita do tijolo");
       // Atualize a velocidade da bola conforme necessário
-      ballVelocity.x = -ballVelocity.x;
+      ballVelocity.x = - ballVelocity.x 
     }
 
     brick.position.set(1000, 1000, 1000);

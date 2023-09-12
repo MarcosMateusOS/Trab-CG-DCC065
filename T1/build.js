@@ -1,13 +1,13 @@
 import addBrick from "./brick.js";
 
-const level = [
-  [1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1],
-];
-
 export function buildBricks(plan) {
-    const colors = ["#00af12", "#efef00", "#df0000"];
+    const level = [
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+    ];
+  
+    const colors = ["#00af27", "#efef00", "#df0000"];
   
     const bricks = [];
     let planeWidth = plan.geometry.parameters.width;
