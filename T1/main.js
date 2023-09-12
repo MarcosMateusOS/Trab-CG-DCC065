@@ -309,6 +309,7 @@ function resetGame() {
   if (isPaused) {
     resume();
   }
+  count = { score: 0 };
 }
 
 var keyboard = new KeyboardState();
