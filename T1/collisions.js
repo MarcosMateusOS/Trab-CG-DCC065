@@ -64,9 +64,10 @@ export function checkBordersCollision(
   }
 
   if (wallBottomBox.intersectsBox(ballBox)) {
-    // O vetor normal à parede esquerda é no sentido positivo do eixo X
-    // Portanto, inverta a componente x da velocidade da bola
+    return true;
   }
+
+  return false;
 }
 
 // Função para verificar colisão da bola com os tijolos
@@ -100,7 +101,7 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
       // Corrigido para 'else if'
       console.log("Colisão na parte direita do tijolo");
       // Atualize a velocidade da bola conforme necessário
-      ballVelocity.x = - ballVelocity.x 
+      ballVelocity.x = -ballVelocity.x;
     }
 
     brick.position.set(1000, 1000, 1000);
@@ -108,7 +109,6 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
     brick.visible = false;
 
     count.score++;
-    console.log("iscore: ", count)
+    console.log("iscore: ", count);
   }
 }
-

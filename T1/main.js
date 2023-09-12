@@ -118,7 +118,7 @@ function animate() {
   ball.position.y += ballVelocity.y;
 
   checkPlatformCollision(platform, ball, ballVelocity);
-  checkBordersCollision(
+  const isLose = checkBordersCollision(
     wallLeft,
     wallRigth,
     wallBottom,
@@ -126,6 +126,10 @@ function animate() {
     ball,
     ballVelocity
   );
+
+  if (isLose) {
+    resetGame();
+  }
   bricks.forEach((brick) =>
     checkBrickCollision(brick, ball, ballVelocity, count)
   );
@@ -275,26 +279,23 @@ function updateDimensions() {
   ball.position.y *= proporcaoheight;
 
   scene.add(ball);
-  //fim atualizar bolinha
 
-  // Atualizar tijolos
-
-  //fim atualizar tijolos
-
-  // Atualizar renderer
   renderer.setSize(width, height);
 }
 
 updateDimensions();
 
 let isPaused = false;
+let isResume = true;
 
 function pause() {
   isPaused = true;
+  isResume = console.log(isPaused);
 }
 
 function resume() {
   isPaused = false;
+  console.log(isPaused);
   animate();
 }
 
