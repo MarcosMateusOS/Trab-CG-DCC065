@@ -288,6 +288,33 @@ function updateDimensions() {
   ball.position.y *= proporcaoheight;
 
   scene.add(ball);
+  // resize nos tijolos
+  if (bricks) {
+    let planeWidth = primaryPlanGeometry.parameters.width;
+    let planeHeight = primaryPlanGeometry.parameters.height;
+    let newSize = 0.15 * planeWidth;
+    let newStartPositionX = -planeWidth / 2 + 0.11 * planeWidth;
+    let newStartPositionY = planeHeight / 2 + -0.05 * planeHeight;
+    let newSpacing = 0.3 * newSize;
+
+    bricks.forEach((brick, index) => {
+      if (brick.position.z === 0) {
+        // Atualizar tamanho
+        brick.scale.set(newSize, 0.5 * newSize, 1);
+
+        // Atualizar posição
+        let rowIndex = Math.floor(index / 5); // Supondo que cada linha tenha 5 tijolos
+        let colIndex = index % 5;
+        brick.position.x = newStartPositionX + colIndex * (newSize + newSpacing);
+        brick.position.y = newStartPositionY + rowIndex * -(0.5 * (newSize + newSpacing));
+      }
+    });
+  }  
+
+
+
+
+  //fim resize tijolos
 
   renderer.setSize(width, height);
 }
