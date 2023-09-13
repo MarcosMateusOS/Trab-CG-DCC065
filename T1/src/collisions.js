@@ -2,12 +2,13 @@ import * as THREE from "three";
 
 // Função para verificar colisão da bola com a platforma
 export function checkPlatformCollision(platform, ball, ballVelocity) {
+  
   const paddleBox = new THREE.Box3().setFromObject(platform);
-  const ballBox = new THREE.Box3().setFromObject(ball);
+  const ballSphere = new THREE.Sphere(ball.position,ball.geometry.parameters.radius);
 
-  if (paddleBox.intersectsBox(ballBox)) {
+  if (paddleBox.intersectsSphere(ballSphere)) {
     // Calcule a posição relativa da colisão na platforma (-1 a 1, onde -1 é à esquerda e 1 é à direita)
-
+    if(ballSphere.center.y > paddleBox.max.y){
     const collisionPoint = new THREE.Vector3().copy(ball.position);
     platform.worldToLocal(collisionPoint);
     const collisionX =
@@ -22,11 +23,24 @@ export function checkPlatformCollision(platform, ball, ballVelocity) {
     const currentSpeed = ballVelocity.length();
     const newVelocity = new THREE.Vector3(
       Math.sin(angle) * currentSpeed,
-      Math.cos(angle) * Math.abs(currentSpeed), // Garante o eixo Y positivo
+      Math.cos(angle) * Math.abs(currentSpeed), // Garante o eixoq Y positivo
       0
     );
 
     ballVelocity.copy(newVelocity);
+    }
+    else
+    {
+      if (paddleBox.max.x < ballSphere.center.x) {
+        console.log("Colisão na parte direita da plataforma");
+        ballVelocity.x = -ballVelocity.x;
+      }
+      // Verificar colisão na parte direita do tijoloqqqq
+      else if (paddleBox.min.x > ballSphere.center.x) {
+        console.log("Colisão na parte esquerda da plataforma");
+        ballVelocity.x = -ballVelocity.x;
+      }
+    }
   }
 }
 

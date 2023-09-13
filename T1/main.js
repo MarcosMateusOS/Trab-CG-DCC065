@@ -73,7 +73,8 @@ const ball = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
 );
 let initialBallPosition = -0.3 * primaryPlan.geometry.parameters.height;
-ball.position.set(0, yOffset, 0);
+let ballOffset = - yOffset - platform.geometry.parameters.height;
+ball.position.set(0, -ballOffset, 0);
 platform.add(ball);
 
 let start = false;
@@ -311,7 +312,7 @@ function resetGame() {
   start = false;
   platform.position.set(0, yOffset, 0.0);
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
-  ball.position.set(0, yOffset, 0);
+  ball.position.set(0, yOffset + platform.geometry.parameters.height, 0);
   removeBricks();
   bricks = [];
   buildBricksPlan();
