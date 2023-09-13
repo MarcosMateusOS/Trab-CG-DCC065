@@ -73,41 +73,38 @@ export function checkBordersCollision(
 // Função para verificar colisão da bola com os tijolos
 export function checkBrickCollision(brick, ball, ballVelocity, count) {
   const brickBox = new THREE.Box3().setFromObject(brick);
-  const ballBox = new THREE.Box3().setFromObject(ball);
+  const ballSphere = new THREE.Sphere(ball.position,ball.geometry.parameters.radius);
 
-  if (brickBox.intersectsBox(ballBox)) {
-    const brickMin = brickBox.min;
-    const brickMax = brickBox.max;
-    const ballMin = ballBox.min;
-    const ballMax = ballBox.max;
+  if (brickBox.intersectsSphere(ballSphere)) {
+    const ballPos = ballSphere.center;
+    let brickMax = brickBox.max;
+    let brickMin = brickBox.min;
 
-    const topCollision = Math.abs(brickMax.y - ballMin.y) < 3;
-    const bottomCollision = Math.abs(brickMin.y - ballMax.y) < 3;
-    const leftCollision = Math.abs(brickMin.x - ballMax.x) < 3;
-    const rightCollision = Math.abs(brickMax.x - ballMin.x) < 3;
-
-    if (topCollision) {
+    // Verificar colisão na parte superior do tijolo
+    if (ballPos.y  > brickMax.y) {
       console.log("Colisão na parte de cima do tijolo");
       ballVelocity.y = -ballVelocity.y;
-    } else if (bottomCollision) {
+    }
+    // Verificar colisão na parte inferior do tijolo
+    else if (brickMin.y > ballPos.y) {
       console.log("Colisão na parte de baixo do tijolo");
-      // Atualize a velocidade da bola conforme necessário
       ballVelocity.y = -ballVelocity.y;
-    } else if (leftCollision) {
+    }
+    // Verificar colisão na parte esquerda do tijolo
+    else if (brickMin.x > ballPos.x) {
       console.log("Colisão na parte esquerda do tijolo");
-      // Atualize a velocidade da bola conforme necessário
       ballVelocity.x = -ballVelocity.x;
-    } else if (rightCollision) {
-      // Corrigido para 'else if'
+    }
+    // Verificar colisão na parte direita do tijolo
+    else if (brickMax.x > ballPos.x) {
       console.log("Colisão na parte direita do tijolo");
-      // Atualize a velocidade da bola conforme necessário
       ballVelocity.x = -ballVelocity.x;
     }
 
+    // Mover o tijolo para fora da cena e torná-lo invisível
     brick.position.set(1000, 1000, 1000);
-
     brick.visible = false;
-
+    
     count.score++;
     console.log("iscore: ", count);
   }
