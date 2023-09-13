@@ -337,6 +337,7 @@ function resume() {
 
 function resetGame() {
   start = false;
+  count.score = 0;
   platform.position.set(0, yOffset, 0.0);
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
   ball.position.set(0, yOffset + platform.geometry.parameters.height, 0);
@@ -374,9 +375,14 @@ function keyboardUpdate() {
   }
 
   if (keyboard.down("enter")) fullScreen();
-  if (keyboard.down("Q")) start = true;
+  // if (keyboard.down("Q")) start = true;
   // if (keyboard.down("enter")) resume();
 }
+
+
+document.addEventListener("click", function() {
+  start = true;
+});
 
 //updateDimensions();
 
