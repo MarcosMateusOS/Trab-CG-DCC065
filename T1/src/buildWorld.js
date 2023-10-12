@@ -1,18 +1,21 @@
 import * as THREE from "three";
 
 export function buildWordPlans(scene, width, height) {
-  let primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
-  let primaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+  let primaryPlanGeometry = new THREE.PlaneGeometry(width, height);
+  let primaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
   let primaryPlan = new THREE.Mesh(primaryPlanGeometry, primaryPlanMaterial);
-
+  primaryPlan.position.set(0, 0, -5);
   scene.add(primaryPlan);
-
-  let secundaryPlanGeometry = new THREE.PlaneGeometry(width, height);
-  let secundaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  
+  let secundaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
+  let secundaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
   let secundaryPlan = new THREE.Mesh(
     secundaryPlanGeometry,
     secundaryPlanMaterial
   );
+    
+  secundaryPlan.position.set(0, 0, 5);
+ 
   scene.add(secundaryPlan);
 
   return {

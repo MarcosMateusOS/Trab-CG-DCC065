@@ -1,15 +1,9 @@
 import * as THREE from "three";
-export default function cameraInit(tamanho, largura, position) {
-  var camera = new THREE.OrthographicCamera(
-    largura / -2,
-    largura / 2,
-    tamanho / 2,
-    tamanho / -2,
-    0.1,
-    1000
-  );
+export default function cameraInit(width, heigth,position) {
+  var camera = new THREE.PerspectiveCamera(60, width / (heigth*2) , 0.1, 1200);
+  camera.rotation.set(Math.PI / 2, 0, 0)
   camera.position.copy(position);
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
-
+  camera.lookAt(0, 0, 0);
   return camera;
 }
+ 

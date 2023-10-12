@@ -11,192 +11,190 @@ import {
 } from "./src/collisions.js";
 
 import KeyboardState from "../libs/util/KeyboardState.js";
-import { initRenderer } from "../libs/util/util.js";
+import { initRenderer,initDefaultBasicLight,lightFollowingCamera } from "../libs/util/util.js";
 
 import { buildWordPlans, buildWorldWalls } from "./src/buildWorld.js";
 import { buildBricks } from "./src/bricks.js";
 
 var count = { score: 0 };
-
-let scene, renderer, camera;
-scene = new THREE.Scene();
-scene.background = new THREE.Color("black"); //0xf0f0f0);
-renderer = initRenderer();
-
 let height = window.innerHeight;
 let width = window.innerWidth;
-let aspect = width / height;
-let position = new THREE.Vector3(0, 0, 90);
+let scene, renderer, camera;
+scene = new THREE.Scene();
+let position = new THREE.Vector3(0, 0, 1000);
 camera = cameraInit(height, width, position);
+let light = initDefaultBasicLight(scene);
+lightFollowingCamera(light, camera) 
+scene.background = new THREE.Color("black");
+renderer = initRenderer();
+
+
+
+
 
 const { primary, second } = buildWordPlans(scene, width, height);
 
-//Criação plano primário
-var primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
-let primaryPlanMaterial = new THREE.MeshBasicMaterial({ color: 0x00afaf });
-let primaryPlan = new THREE.Mesh(primaryPlanGeometry, primaryPlanMaterial);
-// primaryPlan.layers.set(0);
-scene.add(primaryPlan);
+// //Criação plano primário
+
 //fim criação plano primário
 
-let secundaryPlanGeometry = second.secundaryPlanGeometry;
-let secundaryPlan = second.secundaryPlan;
+// let secundaryPlanGeometry = second.secundaryPlanGeometry;
+// let secundaryPlan = second.secundaryPlan;
 
-//Criação de paredes
-const { walls, geometry } = buildWorldWalls(scene, height);
+// //Criação de paredes
+// const { walls, geometry } = buildWorldWalls(scene, height);
 
-let wallTopBottomGeometry = geometry.topBottom;
-let wallLeftRigthGeometry = geometry.leftRigth;
+// let wallTopBottomGeometry = geometry.topBottom;
+// let wallLeftRigthGeometry = geometry.leftRigth;
 
-let wallTop = walls.wallTop;
-let wallBottom = walls.wallBottom;
-//Cria as paredes na esquerda e direita
-let wallRigth = walls.wallRigth;
-let wallLeft = walls.wallLeft;
+// let wallTop = walls.wallTop;
+// let wallBottom = walls.wallBottom;
+// //Cria as paredes na esquerda e direita
+// let wallRigth = walls.wallRigth;
+// let wallLeft = walls.wallLeft;
 
-// Criação rebatedor
-let platformWidth = 0.15 * primaryPlanGeometry.parameters.width;
-let platformHeight = 0.025 * primaryPlanGeometry.parameters.height;
-var platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
-let platformMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-let platform = new THREE.Mesh(platformGeometry, platformMaterial);
-let yOffset = height * -0.4;
-platform.position.set(0, yOffset, 0.0);
+// // Criação rebatedor
+// let platformWidth = 0.15 * primaryPlanGeometry.parameters.width;
+// let platformHeight = 0.025 * primaryPlanGeometry.parameters.height;
+// var platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
+// let platformMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+// let platform = new THREE.Mesh(platformGeometry, platformMaterial);
+// let yOffset = height * -0.4;
+// platform.position.set(0, yOffset, 0.0);
 
-scene.add(platform);
-//fim criação rebatedor
+// scene.add(platform);
+// //fim criação rebatedor
 
-// criação bola
-let initialBallRadius = 0.01 * primaryPlanGeometry.parameters.width;
-const ball = new THREE.Mesh(
-  new THREE.SphereGeometry(initialBallRadius),
-  new THREE.MeshBasicMaterial({ color: 0xff0000 })
-);
-let initialBallPosition = -0.3 * primaryPlan.geometry.parameters.height;
-let ballOffset = - yOffset - platform.geometry.parameters.height;
-ball.position.set(0, -ballOffset, 0);
-platform.add(ball);
+// // criação bola
+// let initialBallRadius = 0.01 * primaryPlanGeometry.parameters.width;
+// const ball = new THREE.Mesh(
+//   new THREE.SphereGeometry(initialBallRadius),
+//   new THREE.MeshBasicMaterial({ color: 0xff0000 })
+// );
+// let initialBallPosition = -0.3 * primaryPlan.geometry.parameters.height;
+// let ballOffset = - yOffset - platform.geometry.parameters.height;
+// ball.position.set(0, -ballOffset, 0);
+// platform.add(ball);
 
-let start = false;
+// let start = false;
 
-let initialBallVelocity = 0.005 * height;
-const ballVelocity = new THREE.Vector3(0, -initialBallVelocity, 0);
+// let initialBallVelocity = 0.005 * height;
+// const ballVelocity = new THREE.Vector3(0, -initialBallVelocity, 0);
 
 //fim criação bola
 
 //updateDimensions();
 let bricks;
-function buildBricksPlan() {
-  bricks = buildBricks(primaryPlan);
+// function buildBricksPlan() {
+//   bricks = buildBricks(primaryPlan);
 
-  bricks.forEach((brick) => {
-    scene.add(brick);
-  });
-}
+//   bricks.forEach((brick) => {
+//     scene.add(brick);
+//   });
+// }
 
-function removeBricks() {
-  console.log("removeBricks");
-  bricks.forEach((brick) => {
-    const object = scene.getObjectByProperty("uuid", brick.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
-    object.geometry.dispose();
-    object.material.dispose();
-    console.log(object);
-    scene.remove(object); // disposing and deleting mesh from scene
-  });
-}
+// function removeBricks() {
+//   bricks.forEach((brick) => {
+//     const object = scene.getObjectByProperty("uuid", brick.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
+//     object.geometry.dispose();
+//     object.material.dispose();
+//     console.log(object);
+//     scene.remove(object); // disposing and deleting mesh from scene
+//   });
+// }
 
-buildBricksPlan();
+// buildBricksPlan();
 
 // animação bola
-function animate() {
-  if (isPaused) return;
+// function animate() {
+//   if (isPaused) return;
 
-  if (start) {
-    ball.position.x += ballVelocity.x;
-    ball.position.y += ballVelocity.y;
+//   if (start) {
+//     ball.position.x += ballVelocity.x;
+//     ball.position.y += ballVelocity.y;
 
-    checkPlatformCollision(platform, ball, ballVelocity);
-    const isLose = checkBordersCollision(
-      wallLeft,
-      wallRigth,
-      wallBottom,
-      wallTop,
-      ball,
-      ballVelocity
-    );
+//     checkPlatformCollision(platform, ball, ballVelocity);
+//     const isLose = checkBordersCollision(
+//       wallLeft,
+//       wallRigth,
+//       wallBottom,
+//       wallTop,
+//       ball,
+//       ballVelocity
+//     );
 
-    if (isLose) {
-      resetGame();
-    }
-    bricks.forEach((brick) =>
-      checkBrickCollision(brick, ball, ballVelocity, count)
-    );
+//     if (isLose) {
+//       resetGame();
+//     }
+//     bricks.forEach((brick) =>
+//       checkBrickCollision(brick, ball, ballVelocity, count)
+//     );
 
-    console.log("score: ", count.score);
+//     console.log("score: ", count.score);
 
-    if (count.score === 15) {
-      count.score = 0;
-      pause();
-    }
-  }
-}
+//     if (count.score === 15) {
+//       count.score = 0;
+//       pause();
+//     }
+//   }
+// }
 //fim animação  bola
 
 // Criação Raycaster
-let raycaster = new THREE.Raycaster();
+// let raycaster = new THREE.Raycaster();
 
-window.addEventListener("mousemove", onMouseMove, false);
-function onMouseMove(event) {
-  if (!isPaused) {
-    let mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+// window.addEventListener("mousemove", onMouseMove, false);
+// function onMouseMove(event) {
+//   if (!isPaused) {
+//     let mouse = new THREE.Vector2();
+//     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+//     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    raycaster.setFromCamera(mouse, camera);
+//     raycaster.setFromCamera(mouse, camera);
 
-    let intersects = raycaster.intersectObjects([primaryPlan, secundaryPlan]);
+//     let intersects = raycaster.intersectObjects([primaryPlan, secundaryPlan]);
 
-    if (intersects.length > 0) {
-      let point = intersects[0].point; // Pick the point where intersects occurrs
+//     if (intersects.length > 0) {
+//       let point = intersects[0].point; // Pick the point where intersects occurrs
 
-      // Calcula os limites do planoPrimario
-      let borderLeftSize = wallLeft.geometry.parameters.width;
-      let borderRightSize = wallRigth.geometry.parameters.width;
+//       // Calcula os limites do planoPrimario
+//       let borderLeftSize = wallLeft.geometry.parameters.width;
+//       let borderRightSize = wallRigth.geometry.parameters.width;
 
-      let leftLimit =
-        wallLeft.position.x + platformWidth / 2 + borderLeftSize / 2; // Ajustado aqui
-      let rightLimit =
-        wallRigth.position.x - platformWidth / 2 - borderRightSize / 2; // Ajustado aqui
+//       let leftLimit =
+//         wallLeft.position.x + platformWidth / 2 + borderLeftSize / 2; // Ajustado aqui
+//       let rightLimit =
+//         wallRigth.position.x - platformWidth / 2 - borderRightSize / 2; // Ajustado aqui
 
-      // Verifica se a posição x da interseção está dentro dos limites
-      if (
-        point.x >= leftLimit && // Ajustado aqui
-        point.x <= rightLimit // Ajustado aqui
-      ) {
-        // Move o retângulo para a posição x da interseção
-        platform.position.x = point.x;
+//       // Verifica se a posição x da interseção está dentro dos limites
+//       if (
+//         point.x >= leftLimit && // Ajustado aqui
+//         point.x <= rightLimit // Ajustado aqui
+//       ) {
+//         // Move o retângulo para a posição x da interseção
+//         platform.position.x = point.x;
 
-        if (!start) {
-          ball.position.x = point.x;
-        }
-      } else if (point.x < leftLimit) {
-        // Ajustado aqui
-        // Coloca o retângulo no limite à esquerda
-        platform.position.x = leftLimit; // Ajustado aqui
-        if (!start) {
-          ball.position.x = leftLimit;
-        }
-      } else if (point.x > rightLimit) {
-        // Ajustado aqui
-        // Coloca o retângulo no limite à direita
-        platform.position.x = rightLimit; // Ajustado aqui
-        if (!start) {
-          ball.position.x = rightLimit; // Ajustado aqui
-        }
-      }
-    }
-  }
-}
+//         if (!start) {
+//           ball.position.x = point.x;
+//         }
+//       } else if (point.x < leftLimit) {
+//         // Ajustado aqui
+//         // Coloca o retângulo no limite à esquerda
+//         platform.position.x = leftLimit; // Ajustado aqui
+//         if (!start) {
+//           ball.position.x = leftLimit;
+//         }
+//       } else if (point.x > rightLimit) {
+//         // Ajustado aqui
+//         // Coloca o retângulo no limite à direita
+//         platform.position.x = rightLimit; // Ajustado aqui
+//         if (!start) {
+//           ball.position.x = rightLimit; // Ajustado aqui
+//         }
+//       }
+//     }
+//   }
+// }
 
 //fim criação Raycaster
 
@@ -208,118 +206,118 @@ window.addEventListener(
   false
 );
 
-function updateDimensions() {
-  // Atualizar height e proporção da janela
-  width = window.innerWidth;
-  height = window.innerHeight;
-  aspect = width / height;
-  //fim atualizar height e proporção
+// function updateDimensions() {
+//   // Atualizar height e proporção da janela
+//   width = window.innerWidth;
+//   height = window.innerHeight;
+//   aspect = width / height;
+//   //fim atualizar height e proporção
 
-  // Atualizar câmera
-  camera.left = width / -2;
-  camera.right = width / 2;
-  camera.top = height / 2;
-  camera.bottom = height / -2;
-  camera.updateProjectionMatrix();
-  //fim atualizar câmera
+//   // Atualizar câmera
+//   camera.left = width / -2;
+//   camera.right = width / 2;
+//   camera.top = height / 2;
+//   camera.bottom = height / -2;
+//   camera.updateProjectionMatrix();
+//   //fim atualizar câmera
 
-  // Atualizar plano secundário
-  secundaryPlanGeometry.dispose();
-  secundaryPlanGeometry = new THREE.PlaneGeometry(width, height);
-  secundaryPlan.geometry = secundaryPlanGeometry;
-  //fim atualizar plano secundário
+//   // Atualizar plano secundário
+//   secundaryPlanGeometry.dispose();
+//   secundaryPlanGeometry = new THREE.PlaneGeometry(width, height);
+//   secundaryPlan.geometry = secundaryPlanGeometry;
+//   //fim atualizar plano secundário
 
-  // Atualizar plano primário
-  let oldWidth = primaryPlanGeometry.parameters.width;
-  let oldHeight = primaryPlanGeometry.parameters.height;
+//   // Atualizar plano primário
+//   let oldWidth = primaryPlanGeometry.parameters.width;
+//   let oldHeight = primaryPlanGeometry.parameters.height;
 
-  primaryPlanGeometry.dispose();
-  primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
+//   primaryPlanGeometry.dispose();
+//   primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
 
-  let newWidth = primaryPlanGeometry.parameters.width;
-  let newHeight = primaryPlanGeometry.parameters.height;
+//   let newWidth = primaryPlanGeometry.parameters.width;
+//   let newHeight = primaryPlanGeometry.parameters.height;
 
-  primaryPlan.geometry = primaryPlanGeometry;
-  //fim atualizar plano primário
+//   primaryPlan.geometry = primaryPlanGeometry;
+//   //fim atualizar plano primário
 
-  // Atualizar plataforma
-  platformWidth = primaryPlanGeometry.parameters.width * 0.225;
-  platformHeight = primaryPlanGeometry.parameters.height * 0.025;
-  platform.geometry.dispose();
-  platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
-  platform.geometry = platformGeometry;
-  yOffset = height * -0.4;
-  platform.position.set(0, yOffset, 0.0);
-  //fim atualizar plataforma
+//   // Atualizar plataforma
+//   platformWidth = primaryPlanGeometry.parameters.width * 0.225;
+//   platformHeight = primaryPlanGeometry.parameters.height * 0.025;
+//   platform.geometry.dispose();
+//   platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
+//   platform.geometry = platformGeometry;
+//   yOffset = height * -0.4;
+//   platform.position.set(0, yOffset, 0.0);
+//   //fim atualizar plataforma
 
-  // Atualizar barras
-  wallTop.geometry.dispose();
-  wallBottom.geometry.dispose();
-  wallTopBottomGeometry = new THREE.BoxGeometry(
-    primaryPlanGeometry.parameters.width,
-    0.05 * height,
-    0
-  );
-  wallTop.geometry = wallTopBottomGeometry;
-  wallBottom.geometry = wallTopBottomGeometry;
-  wallTop.position.y = height / 2;
-  wallBottom.position.y = -height / 2;
+//   // Atualizar barras
+//   wallTop.geometry.dispose();
+//   wallBottom.geometry.dispose();
+//   wallTopBottomGeometry = new THREE.BoxGeometry(
+//     primaryPlanGeometry.parameters.width,
+//     0.05 * height,
+//     0
+//   );
+//   wallTop.geometry = wallTopBottomGeometry;
+//   wallBottom.geometry = wallTopBottomGeometry;
+//   wallTop.position.y = height / 2;
+//   wallBottom.position.y = -height / 2;
 
-  wallLeft.geometry.dispose();
-  wallRigth.geometry.dispose();
-  wallLeftRigthGeometry = new THREE.BoxGeometry(0.025 * height, height, 0);
-  wallLeft.geometry = wallLeftRigthGeometry;
-  wallRigth.geometry = wallLeftRigthGeometry;
-  wallLeft.position.x = -height / 4;
-  wallRigth.position.x = height / 4;
-  //fim atualizar barras
+//   wallLeft.geometry.dispose();
+//   wallRigth.geometry.dispose();
+//   wallLeftRigthGeometry = new THREE.BoxGeometry(0.025 * height, height, 0);
+//   wallLeft.geometry = wallLeftRigthGeometry;
+//   wallRigth.geometry = wallLeftRigthGeometry;
+//   wallLeft.position.x = -height / 4;
+//   wallRigth.position.x = height / 4;
+//   //fim atualizar barras
 
-  // Atualizar bolinha
-  let newBallRadius = 0.03 * primaryPlanGeometry.parameters.width;
-  ball.geometry.dispose();
-  let ballGeometry = new THREE.SphereGeometry(newBallRadius);
-  ball.geometry = ballGeometry;
-  let newBallVelocity = 0.005 * height;
-  ballVelocity.normalize();
-  ballVelocity.multiplyScalar(newBallVelocity);
-  let proporcaoheight = newWidth / oldWidth;
-  let proporcaowidth = newHeight / oldHeight;
-  ball.position.x *= proporcaowidth;
-  ball.position.y *= proporcaoheight;
+//   // Atualizar bolinha
+//   let newBallRadius = 0.03 * primaryPlanGeometry.parameters.width;
+//   ball.geometry.dispose();
+//   let ballGeometry = new THREE.SphereGeometry(newBallRadius);
+//   ball.geometry = ballGeometry;
+//   let newBallVelocity = 0.005 * height;
+//   ballVelocity.normalize();
+//   ballVelocity.multiplyScalar(newBallVelocity);
+//   let proporcaoheight = newWidth / oldWidth;
+//   let proporcaowidth = newHeight / oldHeight;
+//   ball.position.x *= proporcaowidth;
+//   ball.position.y *= proporcaoheight;
 
-  scene.add(ball);
-  // resize nos tijolos
-  if (bricks) {
-    let planeWidth = primaryPlanGeometry.parameters.width;
-    let planeHeight = primaryPlanGeometry.parameters.height;
-    let newSize = 0.15 * planeWidth;
-    let newStartPositionX = -planeWidth / 2 + 0.11 * planeWidth;
-    let newStartPositionY = planeHeight / 2 + -0.05 * planeHeight;
-    let newSpacing = 0.3 * newSize;
+//   scene.add(ball);
+//   // resize nos tijolos
+//   if (bricks) {
+//     let planeWidth = primaryPlanGeometry.parameters.width;
+//     let planeHeight = primaryPlanGeometry.parameters.height;
+//     let newSize = 0.15 * planeWidth;
+//     let newStartPositionX = -planeWidth / 2 + 0.11 * planeWidth;
+//     let newStartPositionY = planeHeight / 2 + -0.05 * planeHeight;
+//     let newSpacing = 0.3 * newSize;
 
-    bricks.forEach((brick, index) => {
-      if (brick.position.z === 0) {
-        // Atualizar tamanho
-        brick.scale.set(newSize, 0.5 * newSize, 1);
+//     bricks.forEach((brick, index) => {
+//       if (brick.position.z === 0) {
+//         // Atualizar tamanho
+//         brick.scale.set(newSize, 0.5 * newSize, 1);
 
-        // Atualizar posição
-        let rowIndex = Math.floor(index / 5); // Supondo que cada linha tenha 5 tijolos
-        let colIndex = index % 5;
-        brick.position.x = newStartPositionX + colIndex * (newSize + newSpacing);
-        brick.position.y = newStartPositionY + rowIndex * -(0.5 * (newSize + newSpacing));
-      }
-    });
-  }  
-
-
+//         // Atualizar posição
+//         let rowIndex = Math.floor(index / 5); // Supondo que cada linha tenha 5 tijolos
+//         let colIndex = index % 5;
+//         brick.position.x = newStartPositionX + colIndex * (newSize + newSpacing);
+//         brick.position.y = newStartPositionY + rowIndex * -(0.5 * (newSize + newSpacing));
+//       }
+//     });
+//   }  
 
 
-  //fim resize tijolos
 
-  renderer.setSize(width, height);
-}
 
-updateDimensions();
+//   //fim resize tijolos
+
+//   renderer.setSize(width, height);
+// }
+
+// updateDimensions();
 
 let isPaused = false;
 let isResume = true;
@@ -389,7 +387,8 @@ document.addEventListener("click", function() {
 render();
 function render() {
   keyboardUpdate();
-  animate();
+  //animate();
+  
   requestAnimationFrame(render);
   renderer.render(scene, camera); // Render scene
 }
