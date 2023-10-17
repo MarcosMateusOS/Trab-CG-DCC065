@@ -499,7 +499,7 @@ export function createGroundPlaneXZ(width, height, widthSegments = 10, heightSeg
  * Create a small and simple ground plane. Width and Height are in X and Y
  */
 export function createGroundPlane(width, height, widthSegments = 10, heightSegments = 10, gcolor = null) {
-   if (!gcolor) gcolor = "rgb(200,200,200)";
+   if (!gcolor) gcolor = "rgb(255,255,255)";
    // create the ground plane
    var planeGeometry = new THREE.PlaneGeometry(width, height, widthSegments, heightSegments);
    var planeMaterial = new THREE.MeshLambertMaterial({ color: gcolor, side: THREE.DoubleSide });
