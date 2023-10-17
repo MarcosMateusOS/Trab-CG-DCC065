@@ -31,15 +31,16 @@ renderer = initRenderer();
 
 
 
-
+//Criação plano primário
 const { primary, second } = buildWordPlans(scene, width, height);
 
-// //Criação plano primário
-
+let primaryPlanGeometry = primary.primaryPlanGeometry
+let primaryPlan = primaryPlanGeometry
+let secundaryPlanGeometry = second.secundaryPlanGeometry;
+let secundaryPlan = second.secundaryPlan;
 //fim criação plano primário
 
-// let secundaryPlanGeometry = second.secundaryPlanGeometry;
-// let secundaryPlan = second.secundaryPlan;
+
 
 // //Criação de paredes
 // const { walls, geometry } = buildWorldWalls(scene, height);
@@ -66,15 +67,14 @@ const { primary, second } = buildWordPlans(scene, width, height);
 // //fim criação rebatedor
 
 // // criação bola
-// let initialBallRadius = 0.01 * primaryPlanGeometry.parameters.width;
-// const ball = new THREE.Mesh(
-//   new THREE.SphereGeometry(initialBallRadius),
-//   new THREE.MeshBasicMaterial({ color: 0xff0000 })
-// );
-// let initialBallPosition = -0.3 * primaryPlan.geometry.parameters.height;
+let initialBallRadius = 0.03 * primaryPlanGeometry.parameters.width;
+let ballGeometry = new THREE.SphereGeometry(initialBallRadius)
+let ballMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+let ball = new THREE.Mesh(ballGeometry,ballMaterial)
+let initialBallPosition = -0.3 * primaryPlanGeometry.parameters.height;
 // let ballOffset = - yOffset - platform.geometry.parameters.height;
-// ball.position.set(0, -ballOffset, 0);
-// platform.add(ball);
+//ball.position.set(0, -ballOffset, 0);
+scene.add(ball);
 
 // let start = false;
 

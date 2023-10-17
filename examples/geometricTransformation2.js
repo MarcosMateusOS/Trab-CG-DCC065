@@ -91,7 +91,7 @@ function updatePositionMessage()
    let wp = new THREE.Vector3(); 
    sphere.getWorldPosition( wp );
 
-   var str =  "Sphere Position: Local Space {" + sphere.position.x.toFixed(1) + ", " + sphere.position.y.toFixed(1) + ", " + sphere.position.z.toFixed(1) + "} " + 
+   var str =  "Sphere Position: Local Space {" + camera.position.x.toFixed(1) + ", " + camera.position.y.toFixed(1) + ", " + camera.position.z.toFixed(1) + "} " + 
              "| World Space {" + wp.x.toFixed(1) + ", " + wp.y.toFixed(1) + ", " + wp.z.toFixed(1) + "}";
    positionMessage.changeMessage(str);
 }
