@@ -91,9 +91,9 @@ let ballOffset = - yOffset - platform.geometry.parameters.height;
 ball.position.set(0, -ballOffset, 30);
 let start = false;
 
-let initialBallVelocity = 0.005 * height;
+let initialBallVelocity = 0.0035 * height;
 const ballVelocity = new THREE.Vector3(0, -initialBallVelocity, 0);
-  let newBallVelocity = 0.005 * height;
+  let newBallVelocity = 0.003 * height;
   ballVelocity.normalize();
   ballVelocity.multiplyScalar(newBallVelocity);
 //fim criação bola
@@ -121,13 +121,51 @@ function removeBricks() {
 
 buildBricksPlan();
 
+let ballEnergyMesh
+const texture =  new THREE.TextureLoader().load('./utils/energy.jpg')
+
+function ballEnergy(){
+  const geometry = new THREE.BoxGeometry(platformHeight, platformHeight,platformHeight); // Use uma forma geométrica apropriada (neste exemplo, uma caixa)
+  const material = new THREE.MeshLambertMaterial({ map: texture});
+  ballEnergyMesh = new THREE.Mesh(geometry, material);
+
+  ballEnergyMesh.position.set(-175, yOffset - 10, 30); 
+  scene.add(ballEnergyMesh);
+  ballEnergyMesh.visible = true
+
+}
+
+
 // animação bola
+let checkTime = 0
 function animate() {
   if (isPaused) return;
 
   if (start) {
-    ball.position.x += ballVelocity.x;
-    ball.position.y += ballVelocity.y;
+    checkTime += 1 / 60
+
+    if(checkTime <= 15){
+      newBallVelocity = initialBallVelocity
+      newBallVelocity = newBallVelocity + (checkTime / 15) * newBallVelocity;
+      console.log('new ball velocity', newBallVelocity)
+      ballVelocity.normalize();
+      ballVelocity.multiplyScalar(newBallVelocity);
+      ballEnergy()
+
+    } else {
+      ballEnergyMesh.visible = false
+    }
+    
+  
+      ball.position.x += ballVelocity.x;
+      ball.position.y += ballVelocity.y;
+   
+
+    
+      ball.position.x += ballVelocity.x ;
+      ball.position.y += ballVelocity.y ;
+
+   
     console.log("zbolinha:" + ball.position.z);
     checkPlatformCollision(platform, ball, ballVelocity);
     const isLose = checkBordersCollision(
@@ -392,9 +430,10 @@ function keyboardUpdate() {
   // if (keyboard.down("enter")) resume();
 }
 
-
+let initialTime
 document.addEventListener("click", function() {
   start = true;
+  initialTime = Date.now() / 1000; 
 });
 
 //updateDimensions();
