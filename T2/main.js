@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { TextGeometry } from "../build/jsm/geometries/TextGeometry.js";
+import { FontLoader } from "../build/jsm/loaders/FontLoader.js";
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import GUI from "../libs/util/dat.gui.module.js";
 import cameraInit from "./src/camera.js";
@@ -27,8 +29,17 @@ renderer = initRenderer();
 let height = window.innerHeight;
 let width = window.innerWidth;
 let aspect = width / height;
-console.log("aspecto" + aspect + "width:" + width + "height:" + height + "e:" + height/aspect);
-let position = new THREE.Vector3(0, 0, height/2);
+console.log(
+  "aspecto" +
+    aspect +
+    "width:" +
+    width +
+    "height:" +
+    height +
+    "e:" +
+    height / aspect
+);
+let position = new THREE.Vector3(0, 0, height / 2);
 camera = cameraInit(height, width, position);
 
 const { primary, second } = buildWordPlans(scene, width, height);
@@ -51,9 +62,9 @@ let wallTopBottomGeometry = geometry.topBottom;
 let wallLeftRigthGeometry = geometry.leftRigth;
 
 let wallTop = walls.wallTop;
-scene.add(wallTop)
+scene.add(wallTop);
 let wallBottom = walls.wallBottom;
-scene.add(wallBottom)
+scene.add(wallBottom);
 //Cria as paredes na esquerda e direita
 let wallRigth = walls.wallRigth;
 let wallLeft = walls.wallLeft;
@@ -72,11 +83,6 @@ scene.add(platform);
 
 // criação bola
 
-
-
-
-
-
 let newBallRadius = 0.03 * primaryPlanGeometry.parameters.width;
 console.log(newBallRadius);
 const ball = new THREE.Mesh(
@@ -87,15 +93,15 @@ const ball = new THREE.Mesh(
 // let ballOffset = - yOffset - platform.geometry.parameters.height;
 // ball.position.set(0, -ballOffset, 30);
 scene.add(ball);
-let ballOffset = - yOffset - platform.geometry.parameters.height;
+let ballOffset = -yOffset - platform.geometry.parameters.height;
 ball.position.set(0, -ballOffset, 30);
 let start = false;
 
 let initialBallVelocity = 0.0035 * height;
 const ballVelocity = new THREE.Vector3(0, -initialBallVelocity, 0);
-  let newBallVelocity = 0.003 * height;
-  ballVelocity.normalize();
-  ballVelocity.multiplyScalar(newBallVelocity);
+let newBallVelocity = 0.003 * height;
+ballVelocity.normalize();
+ballVelocity.multiplyScalar(newBallVelocity);
 //fim criação bola
 
 //updateDimensions();
@@ -121,51 +127,55 @@ function removeBricks() {
 
 buildBricksPlan();
 
-let ballEnergyMesh
-const texture =  new THREE.TextureLoader().load('./utils/energy.jpg')
+let ballEnergyMesh;
 
-function ballEnergy(){
-  const geometry = new THREE.BoxGeometry(platformHeight, platformHeight,platformHeight); // Use uma forma geométrica apropriada (neste exemplo, uma caixa)
-  const material = new THREE.MeshLambertMaterial({ map: texture});
-  ballEnergyMesh = new THREE.Mesh(geometry, material);
+const font = await new FontLoader().loadAsync("./utils/font/gamefont.json");
+console.log(font);
+let textVelocity = `Speed: ${newBallVelocity.toFixed(2)}`;
+const textGeometry = new TextGeometry(textVelocity, {
+  font: font,
+  size: 15,
+  height: 1,
+});
+const textMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+textMesh.position.set(75, yOffset + 725, 30);
+textMesh.name = "textVelocity";
+scene.add(textMesh);
 
-  ballEnergyMesh.position.set(-175, yOffset - 10, 30); 
-  scene.add(ballEnergyMesh);
-  ballEnergyMesh.visible = true
-
+function updateTextVelocity() {
+  textVelocity = `Speed: ${newBallVelocity.toFixed(2)}`;
+  const textoMesh = scene.getObjectByName("textVelocity");
+  textoMesh.geometry.dispose();
+  textoMesh.geometry = new TextGeometry(textVelocity, {
+    font: font,
+    size: 15,
+    height: 1,
+  });
 }
 
-
 // animação bola
-let checkTime = 0
+let checkTime = 0;
 function animate() {
   if (isPaused) return;
-
+  updateTextVelocity();
   if (start) {
-    checkTime += 1 / 60
+    checkTime += 1 / 60;
 
-    if(checkTime <= 15){
-      newBallVelocity = initialBallVelocity
+    if (checkTime <= 15) {
+      newBallVelocity = initialBallVelocity;
       newBallVelocity = newBallVelocity + (checkTime / 15) * newBallVelocity;
-      console.log('new ball velocity', newBallVelocity)
+      console.log("new ball velocity", newBallVelocity);
       ballVelocity.normalize();
       ballVelocity.multiplyScalar(newBallVelocity);
-      ballEnergy()
-
-    } else {
-      ballEnergyMesh.visible = false
     }
-    
-  
-      ball.position.x += ballVelocity.x;
-      ball.position.y += ballVelocity.y;
-   
 
-    
-      ball.position.x += ballVelocity.x ;
-      ball.position.y += ballVelocity.y ;
+    ball.position.x += ballVelocity.x;
+    ball.position.y += ballVelocity.y;
 
-   
+    ball.position.x += ballVelocity.x;
+    ball.position.y += ballVelocity.y;
+
     console.log("zbolinha:" + ball.position.z);
     checkPlatformCollision(platform, ball, ballVelocity);
     const isLose = checkBordersCollision(
@@ -173,7 +183,7 @@ function animate() {
       wallRigth,
       wallBottom,
       wallTop,
-      ball, 
+      ball,
       ballVelocity
     );
 
@@ -360,10 +370,7 @@ function updateDimensions() {
   //       brick.position.y = newStartPositionY + rowIndex * -(0.5 * (newSize + newSpacing));
   //     }
   //   });
-  // }  
-
-
-
+  // }
 
   //fim resize tijolos
 
@@ -430,33 +437,27 @@ function keyboardUpdate() {
   // if (keyboard.down("enter")) resume();
 }
 
-let initialTime
-document.addEventListener("click", function() {
+let initialTime;
+document.addEventListener("click", function () {
   start = true;
-  initialTime = Date.now() / 1000; 
+  initialTime = Date.now() / 1000;
 });
 
 //updateDimensions();
-
-
-
 
 // Adicionando luz
 renderer.shadowMap.enabled = true;
 let lightColor = "rgb(255,255,255)";
 let dirLight = new THREE.DirectionalLight(lightColor);
 var lightPos = new THREE.Vector3(0, 20, 90);
-setDirectionalLighting(lightPos)
+setDirectionalLighting(lightPos);
 primaryPlan.receiveShadow = true;
 
 ball.castShadow = true;
 
-
 platform.castShadow = true;
 
-
-function setDirectionalLighting(position)
-{
+function setDirectionalLighting(position) {
   dirLight.position.copy(position);
 
   // Shadow settings
@@ -465,8 +466,8 @@ function setDirectionalLighting(position)
   dirLight.shadow.mapSize.height = 2048;
   dirLight.shadow.camera.near = 10;
   dirLight.shadow.camera.far = 200;
-  dirLight.shadow.camera.left = -window.innerHeight/2;
-  dirLight.shadow.camera.right = window.innerHeight/2;
+  dirLight.shadow.camera.left = -window.innerHeight / 2;
+  dirLight.shadow.camera.right = window.innerHeight / 2;
   dirLight.shadow.camera.top = window.innerHeight;
   dirLight.shadow.camera.bottom = -window.innerHeight;
   dirLight.name = "Direction Light";
