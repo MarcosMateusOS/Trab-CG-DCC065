@@ -20,6 +20,7 @@ import { buildBricks } from "./src/bricks.js";
 import { Material, SphereGeometry } from "../build/three.module.js";
 
 var count = { score: 0 };
+var currentLevel = 2;
 
 let scene, renderer, camera;
 scene = new THREE.Scene();
@@ -46,7 +47,7 @@ const { primary, second } = buildWordPlans(scene, width, height);
 
 //Criação plano primário
 var primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
-let primaryPlanMaterial = new THREE.MeshLambertMaterial({ color: "white" });
+let primaryPlanMaterial = new THREE.MeshLambertMaterial({ color: "#24188c" });
 let primaryPlan = new THREE.Mesh(primaryPlanGeometry, primaryPlanMaterial);
 // primaryPlan.layers.set(0);
 scene.add(primaryPlan);
@@ -107,7 +108,7 @@ ballVelocity.multiplyScalar(newBallVelocity);
 //updateDimensions();
 let bricks;
 function buildBricksPlan() {
-  bricks = buildBricks(primaryPlan);
+  bricks = buildBricks(primaryPlan, currentLevel);
 
   bricks.forEach((brick) => {
     scene.add(brick);
@@ -188,6 +189,7 @@ function animate() {
     );
 
     if (isLose) {
+      currentLevel = 1;
       resetGame();
     }
     bricks.forEach((brick) =>
@@ -196,8 +198,10 @@ function animate() {
 
     console.log("score: ", count.score);
 
-    if (count.score === 15) {
+    if (count.score === 66) {
       count.score = 0;
+      currentLevel = 2;
+      resetGame();
       pause();
     }
   }
@@ -423,7 +427,16 @@ function fullScreen() {
 function keyboardUpdate() {
   keyboard.update();
 
-  if (keyboard.down("R")) resetGame();
+  if (keyboard.down("R")) {
+    currentLevel = 1;
+    resetGame();
+  }
+
+  if (keyboard.down("G")) {
+    currentLevel = 2;
+    resetGame();
+  }
+
   if (keyboard.down("space")) {
     if (!isPaused) {
       pause();
