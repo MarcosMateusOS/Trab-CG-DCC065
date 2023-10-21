@@ -29,7 +29,7 @@ export default function cameraInit(tamanho, largura, position) {
   camera.position.copy(position);
 
   // Definindo o ponto para onde a câmera deve olhar.
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  // camera.lookAt(new THREE.Vector3(2, -4, -5));
 
   return camera;
 }

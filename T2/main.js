@@ -15,7 +15,7 @@ import { initRenderer } from "../libs/util/util.js";
 
 import { buildWordPlans, buildWorldWalls } from "./src/buildWorld.js";
 import { buildBricks } from "./src/bricks.js";
-import { Material, SphereGeometry } from "../build/three.module.js";
+import { Material, PCFShadowMap, SphereGeometry } from "../build/three.module.js";
 
 var count = { score: 0 };
 
@@ -24,18 +24,21 @@ scene = new THREE.Scene();
 scene.background = new THREE.Color("black"); //0xf0f0f0);
 renderer = initRenderer();
 
+
+let distanciaPlanoPrimarioZ = 10;
+
 let height = window.innerHeight;
 let width = window.innerWidth;
 let aspect = width / height;
 console.log("aspecto" + aspect + "width:" + width + "height:" + height + "e:" + height/aspect);
-let position = new THREE.Vector3(0, 0, height/2);
+let position = new THREE.Vector3(5, 5, height/2);
 camera = cameraInit(height, width, position);
 
 const { primary, second } = buildWordPlans(scene, width, height);
 
 //Criação plano primário
-var primaryPlanGeometry = new THREE.PlaneGeometry(height / 2, height);
-let primaryPlanMaterial = new THREE.MeshLambertMaterial({ color: "white" });
+var primaryPlanGeometry = new THREE.BoxGeometry(height / 2, height,5);
+let primaryPlanMaterial = new THREE.MeshLambertMaterial({ color: "#24188c" });
 let primaryPlan = new THREE.Mesh(primaryPlanGeometry, primaryPlanMaterial);
 // primaryPlan.layers.set(0);
 scene.add(primaryPlan);
@@ -45,7 +48,7 @@ let secundaryPlanGeometry = second.secundaryPlanGeometry;
 let secundaryPlan = second.secundaryPlan;
 
 //Criação de paredes
-const { walls, geometry } = buildWorldWalls(scene, height);
+const { walls, geometry } = buildWorldWalls(scene, height, distanciaPlanoPrimarioZ);
 
 let wallTopBottomGeometry = geometry.topBottom;
 let wallLeftRigthGeometry = geometry.leftRigth;
@@ -62,10 +65,11 @@ let wallLeft = walls.wallLeft;
 let platformWidth = 0.15 * primaryPlanGeometry.parameters.width;
 let platformHeight = 0.025 * primaryPlanGeometry.parameters.height;
 var platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
-let platformMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+let platformMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
 let platform = new THREE.Mesh(platformGeometry, platformMaterial);
+platform.castShadow = true;
 let yOffset = height * -0.4;
-platform.position.set(0, yOffset, 30);
+platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
 
 scene.add(platform);
 //fim criação rebatedor
@@ -77,18 +81,18 @@ scene.add(platform);
 
 
 
-let newBallRadius = 0.03 * primaryPlanGeometry.parameters.width;
+let newBallRadius = 0.02 * primaryPlanGeometry.parameters.width;
 console.log(newBallRadius);
 const ball = new THREE.Mesh(
   new THREE.SphereGeometry(newBallRadius),
   new THREE.MeshPhongMaterial({ color: 0xff0000 })
-);
+); 
 // let initialBallPosition = -0.3 * primaryPlan.geometry.parameters.height;
 // let ballOffset = - yOffset - platform.geometry.parameters.height;
 // ball.position.set(0, -ballOffset, 30);
 scene.add(ball);
 let ballOffset = - yOffset - platform.geometry.parameters.height;
-ball.position.set(0, -ballOffset, 30);
+ball.position.set(0, -ballOffset, distanciaPlanoPrimarioZ);
 let start = false;
 
 let initialBallVelocity = 0.005 * height;
@@ -98,13 +102,16 @@ const ballVelocity = new THREE.Vector3(0, -initialBallVelocity, 0);
   ballVelocity.multiplyScalar(newBallVelocity);
 //fim criação bola
 
-//updateDimensions();
+//updateDimensions(); 
 let bricks;
 function buildBricksPlan() {
   bricks = buildBricks(primaryPlan);
 
   bricks.forEach((brick) => {
     scene.add(brick);
+    let edges = new THREE.EdgesGeometry(brick.geometry);
+    let line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: "black"} ));
+    brick.add(line);
   });
 }
 
@@ -351,9 +358,9 @@ function resume() {
 function resetGame() {
   start = false;
   count.score = 0;
-  platform.position.set(0, yOffset, 30);
+  platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
-  ball.position.set(0, yOffset + platform.geometry.parameters.height, 30);
+  ball.position.set(0, yOffset + platform.geometry.parameters.height, distanciaPlanoPrimarioZ);
   removeBricks();
   bricks = [];
   buildBricksPlan();
@@ -404,10 +411,17 @@ document.addEventListener("click", function() {
 
 // Adicionando luz
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 let lightColor = "rgb(255,255,255)";
 let dirLight = new THREE.DirectionalLight(lightColor);
-var lightPos = new THREE.Vector3(0, 20, 90);
+var lightPos = new THREE.Vector3(100, 200, 210);
 setDirectionalLighting(lightPos)
+renderer.shadowMap.radius = 0;
+renderer.shadowIntensity = 0;
+scene.add( new THREE.AmbientLight( 0xffffff,0.7) );
+
+
+
 primaryPlan.receiveShadow = true;
 
 ball.castShadow = true;
@@ -425,15 +439,19 @@ function setDirectionalLighting(position)
   dirLight.shadow.mapSize.width = 2048;
   dirLight.shadow.mapSize.height = 2048;
   dirLight.shadow.camera.near = 10;
-  dirLight.shadow.camera.far = 200;
+  dirLight.shadow.camera.far = 1000;
   dirLight.shadow.camera.left = -window.innerHeight/2;
   dirLight.shadow.camera.right = window.innerHeight/2;
   dirLight.shadow.camera.top = window.innerHeight;
   dirLight.shadow.camera.bottom = -window.innerHeight;
   dirLight.name = "Direction Light";
-
+  dirLight.shadow.radius = 3 ;
   scene.add(dirLight);
 }
+
+
+
+
 console.log(window.innerHeight);
 console.log(window.innerWidth);
 // let objColor = "rgb(255,20,20)"; // Define the color of the object
@@ -447,6 +465,8 @@ console.log(window.innerWidth);
 // t.position.set(30,0,40);
 
 // scene.add(t);
+// primaryPlan.rotation.y = -0.1;
+
 
 render();
 function render() {
@@ -455,3 +475,4 @@ function render() {
   requestAnimationFrame(render);
   renderer.render(scene, camera); // Render scene
 }
+
