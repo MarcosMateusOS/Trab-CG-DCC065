@@ -31,7 +31,7 @@ window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)},
 
 //---------------------------------------------------------
 // Default light position
-var lightPosition = new THREE.Vector3(2.0, 1.2, 0.0);
+var lightPosition = new THREE.Vector3(3.0, 1.2, 0.0);
 
 // Sphere to represent the light
 var lightSphere = createLightSphere(scene, 0.05, 10, 10, lightPosition);
