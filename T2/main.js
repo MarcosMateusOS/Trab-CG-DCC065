@@ -65,14 +65,14 @@ let wallRigth = walls.wallRigth;
 let wallLeft = walls.wallLeft;
 
 // Criação rebatedor
-let platformWidth = 0.15 * primaryPlanGeometry.parameters.width;
-let platformHeight = 0.025 * primaryPlanGeometry.parameters.height;
-var platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
-let platformMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
-let platform = new THREE.Mesh(platformGeometry, platformMaterial);
-platform.castShadow = true;
+// let platformWidth = 0.15 * primaryPlanGeometry.parameters.width;
+// let platformHeight = 0.025 * primaryPlanGeometry.parameters.height;
+// var platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
+// let platformMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
+// let platform = new THREE.Mesh(platformGeometry, platformMaterial);
+// platform.castShadow = true;
 let yOffset = height * -0.35;
-platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
+// platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
 
 // scene.add(platform);
 //fim criação rebatedor
@@ -191,7 +191,7 @@ function animate() {
     ball.position.x += ballVelocity.x;
     ball.position.y += ballVelocity.y;
     console.log("zbolinha:" + ball.position.z);
-    checkPlatformCollision(platform, ball, ballVelocity);
+    checkPlatformCollision(mesh2, ball, ballVelocity);
     const isLose = checkBordersCollision(
       wallLeft,
       wallRigth,
@@ -244,8 +244,7 @@ function onMouseMove(event) {
       let rightLimit =
         wallRigth.position.x - (mesh2width)*2 - borderRightSize / 2 - borderLeftSize/5; // Ajustado aqui
 
-      console.log("largura plataforma:" + platform.geometry.parameters.width);
-      console.log("largura rebatedor:" + mesh2width);
+
 
       
 
@@ -255,7 +254,6 @@ function onMouseMove(event) {
         point.x <= rightLimit // Ajustado aqui
       ) {
         // Move o retângulo para a posição x da interseção
-        platform.position.x = point.x;
         mesh2.position.x = point.x;
         updateObject(mesh2);
 
@@ -265,7 +263,6 @@ function onMouseMove(event) {
       } else if (point.x < leftLimit) {
         // Ajustado aqui
         // Coloca o retângulo no limite à esquerda
-        platform.position.x = leftLimit;
         mesh2.position.x = leftLimit;
         updateObject(mesh2); // Ajustado aqui
         if (!start) {
@@ -274,7 +271,6 @@ function onMouseMove(event) {
       } else if (point.x > rightLimit) {
         // Ajustado aqui
         // Coloca o retângulo no limite à direita
-        platform.position.x = rightLimit;
         mesh2.position.x = rightLimit;
         updateObject(mesh2); // Ajustado aqui
         if (!start) {
@@ -424,7 +420,7 @@ function resume() {
 function resetGame() {
   start = false;
   count.score = 0;
-  platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
+  // platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
   ball.position.set(0, yOffset + mesh2height/2, distanciaPlanoPrimarioZ);
   removeBricks();
@@ -493,7 +489,7 @@ primaryPlan.receiveShadow = true;
 ball.castShadow = true;
 
 
-platform.castShadow = true;
+// platform.castShadow = true;
 
 
 function setDirectionalLighting(position)

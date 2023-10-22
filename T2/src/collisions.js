@@ -2,44 +2,46 @@ import * as THREE from "three";
 
 // Função para verificar colisão da bola com a platforma
 export function checkPlatformCollision(platform, ball, ballVelocity) {
-  
-  const paddleBox = new THREE.Box3().setFromObject(platform);
-  const ballSphere = new THREE.Sphere(ball.position,ball.geometry.parameters.radius);
+  // Primeiro, criamos um 'bounding box' para a plataforma. Como a plataforma agora tem uma forma irregular,
+  // o 'bounding box' pode não corresponder perfeitamente aos seus limites.
+  const platformBox = new THREE.Box3().setFromObject(platform);
 
-  if (paddleBox.intersectsSphere(ballSphere)) {
-    // Calcule a posição relativa da colisão na platforma (-1 a 1, onde -1 é à esquerda e 1 é à direita)
-    if(ballSphere.center.y > paddleBox.max.y){
-    const collisionPoint = new THREE.Vector3().copy(ball.position);
-    platform.worldToLocal(collisionPoint);
-    const collisionX =
-      collisionPoint.x / (platform.geometry.parameters.width / 2);
-    // var collisionY = collisionPoint.y
-    // console.log(collisionY)
-    // Calcule o ângulo de saída com base na posição da colisão
-    const maxAngle = Math.PI / 4; // Ângulo máximo de saída
-    const angle = maxAngle * collisionX;
+  // Em seguida, criamos uma esfera de colisão para a bola.
+  const ballSphere = new THREE.Sphere(ball.position, ball.geometry.parameters.radius);
 
-    // Mantenha a magnitude (comprimento) da velocidade constante após a colisão
-    const currentSpeed = ballVelocity.length();
-    const newVelocity = new THREE.Vector3(
-      Math.sin(angle) * currentSpeed,
-      Math.cos(angle) * Math.abs(currentSpeed), // Garante o eixoq Y positivo
-      0
-    );
+  // Verificamos se o 'bounding box' da plataforma intersecta a esfera da bola.
+  if (platformBox.intersectsSphere(ballSphere)) {
+    // Se houver interseção, precisamos determinar o comportamento da bola.
+    // Por simplicidade, vamos apenas inverter a direção da bola, mas você pode implementar
+    // comportamentos mais complexos dependendo das necessidades do seu jogo.
 
-    ballVelocity.copy(newVelocity);
-    }
-    else
-    {
-      if (paddleBox.max.x < ballSphere.center.x) {
-        console.log("Colisão na parte direita da plataforma");
-        ballVelocity.x = -ballVelocity.x;
-      }
-      // Verificar colisão na parte direita do tijoloqqqq
-      else if (paddleBox.min.x > ballSphere.center.x) {
-        console.log("Colisão na parte esquerda da plataforma");
-        ballVelocity.x = -ballVelocity.x;
-      }
+    // Se a bola estiver acima da plataforma, tratamos como uma colisão normal.
+    if (ballSphere.center.y > platformBox.max.y) {
+      // Calcular a posição relativa da colisão na plataforma.
+      const collisionPoint = new THREE.Vector3().copy(ball.position);
+      platform.worldToLocal(collisionPoint);
+
+      const relativeCollisionPoint = collisionPoint.x - platformBox.min.x;
+      const platformWidth = platformBox.max.x - platformBox.min.x;
+      const collisionX = (2 * relativeCollisionPoint - platformWidth) / platformWidth;
+
+      // Calcule o ângulo de saída com base na posição da colisão.
+      const maxAngle = Math.PI / 4; // Ângulo máximo de saída.
+      const angle = maxAngle * collisionX;
+
+      // Mantenha a magnitude (comprimento) da velocidade constante após a colisão.
+      const currentSpeed = ballVelocity.length();
+      const newVelocity = new THREE.Vector3(
+        Math.sin(angle) * currentSpeed,
+        Math.cos(angle) * Math.abs(currentSpeed), // Garante que o eixo Y seja positivo.
+        0
+      );
+
+      ballVelocity.copy(newVelocity);
+    } else {
+      // Se a bola não estiver acima, pode ter atingido os lados ou a parte inferior da plataforma.
+      // Nesse caso, simplesmente invertemos a direção x da bola.
+      ballVelocity.x = -ballVelocity.x;
     }
   }
 }
