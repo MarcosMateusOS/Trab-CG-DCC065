@@ -101,11 +101,12 @@ function buildObjects()
    mesh2 = CSG.toMesh(csgObject, auxMat)
    mesh2.material = new THREE.MeshPhongMaterial({color: 'lightgreen'})
    mesh2.position.set(3, 0, 1)
-   mesh2.rotateY(THREE.MathUtils.degToRad(90));
+//    mesh2.rotateY(THREE.MathUtils.degToRad(90));
    mesh2.scale.x = 0.5;
    mesh2.updateMatrix();
    mesh2.position.set(2,0,2)
    updateObject(mesh2);
+   mesh2.updateMatrix();
    scene.add(mesh2)
 }
 
@@ -134,7 +135,7 @@ function buildInterface()
     this.onWireframeMode = function(){
        mesh1.material.wireframe = this.wire;
        mesh2.material.wireframe = this.wire;       
-       mesh3.material.wireframe = this.wire;              
+       mesh3.material.wireframe = this.wire;           
     };
   };
 
@@ -145,55 +146,52 @@ function buildInterface()
     .onChange(function(e) { controls.onWireframeMode() });
 }
 import { ArrowHelper, Vector3, BufferAttribute } from 'three';
-function addNormalForcesToTopFace(mesh, numberOfArrows) {
-    let geometry = mesh.geometry;
-  
-    // Certifique-se de que temos normais
-    if (!geometry.attributes.normal) {
-      geometry.computeVertexNormals();
+function addNormalArrowsWithinXRange(mesh) {
+    // Verifique se a geometria é do tipo BufferGeometry e tem os atributos necessários
+    if (!mesh.geometry.isBufferGeometry || !mesh.geometry.attributes.position || !mesh.geometry.attributes.normal) {
+        console.error("A geometria não é do tipo BufferGeometry ou não possui atributos de posição/normal.");
+        return;
     }
-  
-    const positions = geometry.attributes.position.array;
-    const normals = geometry.attributes.normal.array;
-  
-    // Verifique se temos posições e normais suficientes
-    if (positions.length > 0 && normals.length > 0) {
-      let addedArrows = 0; // Contador para o número de setas adicionadas
-      for (let i = 0; i < positions.length / 3; i++) { // Percorrendo todos os vértices
-        // Obtenha a posição e a normal
-        const vertex = new Vector3(positions[3 * i], positions[3 * i + 1], positions[3 * i + 2]);
-        const normal = new Vector3(normals[3 * i], normals[3 * i + 1], normals[3 * i + 2]);
-  
-        // Verifique se a normal está apontando aproximadamente para cima
-        if (normal.z > 0.1) { // Este valor pode precisar de ajustes baseado na sua geometria específica
-          // Ajuste a escala e posição da seta
-          const arrowDirection = normal.clone().normalize();
-          const arrowLength = 1;  // Ajuste conforme necessário
-          const arrowColor = 0xff0000;
-  
-          // Transforme a posição do vértice para coordenadas do mundo, pois a posição do mesh influencia isso
-          vertex.applyMatrix4(mesh.matrixWorld);
-  
-          // Crie e adicione a seta à cena
-          const arrowHelper = new ArrowHelper(arrowDirection, vertex, arrowLength, arrowColor);
-          scene.add(arrowHelper);
-  
-          // Incrementa o contador de setas
-          addedArrows++;
-  
-          // Se adicionamos o número desejado de setas, saímos do loop
-          if (addedArrows >= numberOfArrows) {
-            break;
-          }
+
+    const positions = mesh.geometry.attributes.position.array;
+    const normals = mesh.geometry.attributes.normal.array;
+    const numVertices = positions.length / 3;
+
+    // Parâmetros para o intervalo de 'x' e a aparência das setas
+    const lowerBoundX = 0.13;
+    const upperBoundX = 0.18;
+    const arrowLength = 0.5;  // Ajuste conforme necessário
+    const arrowColor = 0xff0000;  // Cor vermelha para a seta
+
+    for (let i = 0; i < numVertices; i++) {
+        const x = positions[i * 3];
+        const y = positions[i * 3 + 1];
+        const z = positions[i * 3 + 2];
+
+        // Se 'x' estiver dentro do intervalo especificado, adicione uma seta de normal
+        if (x >= lowerBoundX && x <= upperBoundX) {
+            // Obtenha a normal para este vértice
+            const normalIndex = i * 3;
+            const normalVector = new THREE.Vector3(
+                normals[normalIndex],     // componente x da normal
+                normals[normalIndex + 1], // componente y da normal
+                normals[normalIndex + 2]  // componente z da normal
+            );
+
+            // Obtenha a posição deste vértice
+            const vertexPosition = new THREE.Vector3(x, y, z);
+
+            // Ajuste a escala e posição da seta
+            const arrowDirection = normalVector.clone().normalize();
+
+            // Crie e adicione a seta à cena
+            const arrowHelper = new THREE.ArrowHelper(arrowDirection, vertexPosition, arrowLength, arrowColor);
+            mesh.add(arrowHelper);
+            mesh.rotateY(THREE.MathUtils.degToRad(90));
+            mesh.updateMatrix();// Adicionando a seta como um child do mesh garante que ela se mova com o mesh
         }
-      }
-      if (addedArrows === 0) {
-        console.warn("Nenhuma seta foi adicionada. Ajuste os critérios de seleção da normal.");
-      }
-    } else {
-      console.warn("A geometria não possui vértices ou normais suficientes para calcular as forças normais.");
     }
 }
 
 // Uso:
-addNormalForcesToTopFace(mesh2, 1900);
+addNormalArrowsWithinXRange(mesh2);
