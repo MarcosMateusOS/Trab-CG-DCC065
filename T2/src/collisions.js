@@ -113,7 +113,7 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
     else if (brickMax.x > ballPos.x) {
       console.log("Colisão na parte direita do tijolo");
       ballVelocity.x = -ballVelocity.x;
-    }
+    } 
 
     // Mover o tijolo para fora da cena e torná-lo invisível
     brick.position.set(1000, 1000, 1000);
