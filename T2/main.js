@@ -11,6 +11,7 @@ import {
   checkBordersCollision,
   checkBrickCollision,
   checkPowerUpCollsion,
+  checkPowerUpIsInDestination,
 } from "./src/collisions.js";
 
 import KeyboardState from "../libs/util/KeyboardState.js";
@@ -151,22 +152,46 @@ let ballEnergyMesh;
 const font = await new FontLoader().loadAsync("./utils/font/gamefont.json");
 
 let textVelocity = `Speed: ${newBallVelocity.toFixed(2)}`;
-const textGeometry = new TextGeometry(textVelocity, {
+const textVelocityGeometry = new TextGeometry(textVelocity, {
   font: font,
   size: 15,
   height: 1,
 });
-const textMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
-const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-textMesh.position.set(75, yOffset + 725, 30);
-textMesh.name = "textVelocity";
-scene.add(textMesh);
+const textVelocityMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+const textVelocityMesh = new THREE.Mesh(
+  textVelocityGeometry,
+  textVelocityMaterial
+);
+textVelocityMesh.position.set(75, yOffset + 720, 30);
+textVelocityMesh.name = "textVelocity";
+scene.add(textVelocityMesh);
 
-function updateTextVelocity() {
+let textScore = `Score: ${count.score}`;
+const textScoreGeometry = new TextGeometry(textScore, {
+  font: font,
+  size: 15,
+  height: 1,
+});
+const textScoreMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+const textScoreMesh = new THREE.Mesh(textScoreGeometry, textScoreMaterial);
+textScoreMesh.position.set(wallLeft.position.x + 35, yOffset + 720, 30);
+textScoreMesh.name = "textScore";
+scene.add(textScoreMesh);
+
+function updateInfos() {
   textVelocity = `Speed: ${newBallVelocity.toFixed(2)}`;
   const textoMesh = scene.getObjectByName("textVelocity");
   textoMesh.geometry.dispose();
   textoMesh.geometry = new TextGeometry(textVelocity, {
+    font: font,
+    size: 15,
+    height: 1,
+  });
+
+  textScore = `Score: ${count.score}`;
+  const textoScoreMesh = scene.getObjectByName("textScore");
+  textoScoreMesh.geometry.dispose();
+  textoScoreMesh.geometry = new TextGeometry(textScore, {
     font: font,
     size: 15,
     height: 1,
@@ -177,8 +202,12 @@ const textureLoader = new TextureLoader();
 const texture = await textureLoader.loadAsync("./utils/energy.jpg");
 
 const lerpConfig = {
-  destination: new THREE.Vector3(0, yOffset - 300, distanciaPlanoPrimarioZ),
-  alpha: 0.01,
+  destination: new THREE.Vector3(
+    wallBottom.position.x,
+    wallBottom.position.y,
+    distanciaPlanoPrimarioZ
+  ),
+  alpha: 0.03,
   angle: 0.0,
   move: false,
 };
@@ -189,11 +218,17 @@ const geometryPowerUp = new THREE.BoxGeometry(1, 1, heightPowerUp * 1);
 const materialPowerUp = new THREE.MeshLambertMaterial({ map: texture });
 const powerUp = new THREE.Mesh(geometryPowerUp, materialPowerUp);
 
-powerUp.position.set(0, yOffset + 300, distanciaPlanoPrimarioZ);
+powerUp.position.set(0, yOffset + 400, distanciaPlanoPrimarioZ);
 powerUp.scale.set(size, size * 0.5, 1);
 powerUp.castShadow = true;
 powerUp.visible = false;
 scene.add(powerUp);
+
+function removePowerUp() {
+  const object = scene.getObjectByProperty("uuid", powerUp.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
+
+  scene.remove(object);
+}
 
 let countPowerUp = 0;
 function showPowerUp() {
@@ -204,10 +239,24 @@ function showPowerUp() {
 
 function putPowerUp() {
   powerUp.visible = false;
-  powerUp.position.set(0, yOffset + 300, distanciaPlanoPrimarioZ);
+  powerUp.position.set(
+    wallBottom.position.x,
+    wallBottom.position.y,
+    distanciaPlanoPrimarioZ
+  );
   lerpConfig.move = false;
 
   duplicateBall();
+}
+
+function resetPowerUp() {
+  powerUp.visible = false;
+  powerUp.position.set(
+    wallBottom.position.x,
+    wallBottom.position.y,
+    distanciaPlanoPrimarioZ
+  );
+  lerpConfig.move = false;
 }
 
 let clonedBall;
@@ -231,16 +280,17 @@ function duplicateBall() {
 }
 
 function removeClonedBall() {
-  console.log(clonedBall);
-  const object = scene.getObjectByProperty("uuid", clonedBall.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
+  if (clonedBall) {
+    const object = scene.getObjectByProperty("uuid", clonedBall.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
 
-  scene.remove(object);
+    scene.remove(object);
+  }
 }
 // animação bola
 let checkTime = 0;
 function animate() {
   if (isPaused) return;
-  updateTextVelocity();
+  updateInfos();
   if (start) {
     countPowerUp = count.score;
     checkTime += 1 / 60;
@@ -297,15 +347,16 @@ function animate() {
       }
     });
 
-    console.log("score: ", count.score);
-
-    if (countPowerUp >= 10) {
-      countPowerUp = 0;
+    if (count.score % 10 == 0 && count.score != 0) {
       showPowerUp();
     }
 
     if (checkPowerUpCollsion(platform, powerUp) && !clonedBall) {
       putPowerUp();
+    }
+
+    if (lerpConfig.move && checkPowerUpIsInDestination(wallBottom, powerUp)) {
+      resetPowerUp();
     }
 
     // if (count.score === 15) {

@@ -116,7 +116,7 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
     else if (brickMax.x > ballPos.x) {
       console.log("Colisão na parte direita do tijolo");
       ballVelocity.x = -ballVelocity.x;
-    } 
+    }
 
     // Mover o tijolo para fora da cena e torná-lo invisível
     brick.position.set(1000, 1000, 1000);
@@ -131,11 +131,20 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
 export function checkPowerUpCollsion(platform, powerUp) {
   const paddleBox = new THREE.Box3().setFromObject(platform);
   const powerUpBox = new THREE.Box3().setFromObject(powerUp);
-  console.log("checkPowerUpCollsion");
-  console.log(paddleBox);
-  console.log(powerUpBox);
-  console.log(paddleBox.intersectsBox(powerUpBox));
+
   if (paddleBox.intersectsBox(powerUpBox)) {
+    return true;
+  }
+
+  return false;
+}
+
+// Função para verificar se o powerUp chegou ao destination
+export function checkPowerUpIsInDestination(wallBottom, powerUp) {
+  const powerUpBox = new THREE.Box3().setFromObject(powerUp);
+  const wallBottomBox = new THREE.Box3().setFromObject(wallBottom);
+
+  if (wallBottomBox.intersectsBox(powerUpBox)) {
     return true;
   }
 
