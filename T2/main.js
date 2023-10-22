@@ -3,6 +3,9 @@ import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import GUI from "../libs/util/dat.gui.module.js";
 import cameraInit from "./src/camera.js";
 
+import { CSG } from '../libs/other/CSGMesh.js'
+
+
 import addPlatform from "./src/platform.js";
 import {
   checkPlatformCollision,
@@ -68,19 +71,71 @@ var platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
 let platformMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
 let platform = new THREE.Mesh(platformGeometry, platformMaterial);
 platform.castShadow = true;
-let yOffset = height * -0.4;
+let yOffset = height * -0.35;
 platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
 
-scene.add(platform);
+// scene.add(platform);
 //fim criação rebatedor
 
+
+
+
+//Criação novo rebatedor
+   let mesh2;
+   let auxMat = new THREE.Matrix4();
+   
+   // Base objects
+   let cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshPhongMaterial({color: 'red'})); // Adicionado material para diferenciação
+   let cylinderMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 2, 17), new THREE.MeshPhongMaterial({color: 'blue'})); // Adicionado material para diferenciação
+   
+   // Posicione e atualize os objetos originais
+   cubeMesh.position.set(0,1, 0); // ou qualquer outra posição desejada
+   cylinderMesh.position.set(1, -0.5, 0.0); // a posição é ajustada para corresponder à operação CSG
+
+   // Atualize as matrizes dos objetos
+   updateObject(cubeMesh);
+   updateObject(cylinderMesh);
+
+   // Adicione os objetos originais à cena
+  //    scene.add(cubeMesh);
+  //    scene.add(cylinderMesh);
+
+   // CSG holders
+   let csgObject, cubeCSG, cylinderCSG;
+
+   // Prepare os objetos para operações CSG
+   cubeCSG = CSG.fromMesh(cubeMesh);
+   cylinderCSG = CSG.fromMesh(cylinderMesh);
+
+   // Object 2 - Cube INTERSECT Cylinder
+   csgObject = cubeCSG.intersect(cylinderCSG); // Execute intersection
+   mesh2 = CSG.toMesh(csgObject, auxMat);
+   mesh2.material = new THREE.MeshLambertMaterial({color: 'green'});
+   mesh2.position.set(3, 0, 10); // Posição após a operação CSG
+   mesh2.scale.x = 0.5;
+   mesh2.rotateY(THREE.MathUtils.degToRad(90));
+   mesh2.rotateZ(THREE.MathUtils.degToRad(270));
+   updateObject(mesh2); // Atualize a matriz do mesh2
+   mesh2.position.set(0, yOffset, 20); // Posição final desejada para o mesh2
+   updateObject(mesh2); // Atualize a matriz novamente após redefinir a posição
+   mesh2.scale.set(primaryPlanGeometry.parameters.width/20,primaryPlanGeometry.parameters.width/20,primaryPlanGeometry.parameters.width/10);
+   updateObject(mesh2);
+   mesh2.geometry.computeBoundingBox();
+   let boundingBox = mesh2.geometry.boundingBox;
+   let mesh2width = boundingBox.max.x - boundingBox.min.x;
+   let mesh2height = boundingBox.max.y - boundingBox.min.y;
+   mesh2width *= mesh2.scale.x;  // Ajustando a largura com base na escala do objeto
+   mesh2height *= mesh2.scale.y; // Ajustando a altura com base na escala do objeto
+   scene.add(mesh2);
+
+function updateObject(mesh)
+{
+   mesh.matrixAutoUpdate = false;
+   mesh.updateMatrix();
+}
+//fim criação novo rebatedor
+
 // criação bola
-
-
-
-
-
-
 let newBallRadius = 0.02 * primaryPlanGeometry.parameters.width;
 console.log(newBallRadius);
 const ball = new THREE.Mesh(
@@ -91,7 +146,7 @@ const ball = new THREE.Mesh(
 // let ballOffset = - yOffset - platform.geometry.parameters.height;
 // ball.position.set(0, -ballOffset, 30);
 scene.add(ball);
-let ballOffset = - yOffset - platform.geometry.parameters.height;
+let ballOffset = - yOffset - mesh2height/2;
 ball.position.set(0, -ballOffset, distanciaPlanoPrimarioZ);
 let start = false;
 
@@ -176,7 +231,7 @@ function onMouseMove(event) {
     raycaster.setFromCamera(mouse, camera);
 
     let intersects = raycaster.intersectObjects([primaryPlan, secundaryPlan]);
-
+ 
     if (intersects.length > 0) {
       let point = intersects[0].point; // Pick the point where intersects occurrs
 
@@ -185,9 +240,14 @@ function onMouseMove(event) {
       let borderRightSize = wallRigth.geometry.parameters.width;
 
       let leftLimit =
-        wallLeft.position.x + platformWidth / 2 + borderLeftSize / 2; // Ajustado aqui
+        wallLeft.position.x + (mesh2width)*2 + borderLeftSize / 2 + borderLeftSize/5; // Ajustado aqui
       let rightLimit =
-        wallRigth.position.x - platformWidth / 2 - borderRightSize / 2; // Ajustado aqui
+        wallRigth.position.x - (mesh2width)*2 - borderRightSize / 2 - borderLeftSize/5; // Ajustado aqui
+
+      console.log("largura plataforma:" + platform.geometry.parameters.width);
+      console.log("largura rebatedor:" + mesh2width);
+
+      
 
       // Verifica se a posição x da interseção está dentro dos limites
       if (
@@ -196,6 +256,8 @@ function onMouseMove(event) {
       ) {
         // Move o retângulo para a posição x da interseção
         platform.position.x = point.x;
+        mesh2.position.x = point.x;
+        updateObject(mesh2);
 
         if (!start) {
           ball.position.x = point.x;
@@ -203,14 +265,18 @@ function onMouseMove(event) {
       } else if (point.x < leftLimit) {
         // Ajustado aqui
         // Coloca o retângulo no limite à esquerda
-        platform.position.x = leftLimit; // Ajustado aqui
+        platform.position.x = leftLimit;
+        mesh2.position.x = leftLimit;
+        updateObject(mesh2); // Ajustado aqui
         if (!start) {
           ball.position.x = leftLimit;
         }
       } else if (point.x > rightLimit) {
         // Ajustado aqui
         // Coloca o retângulo no limite à direita
-        platform.position.x = rightLimit; // Ajustado aqui
+        platform.position.x = rightLimit;
+        mesh2.position.x = rightLimit;
+        updateObject(mesh2); // Ajustado aqui
         if (!start) {
           ball.position.x = rightLimit; // Ajustado aqui
         }
@@ -360,7 +426,7 @@ function resetGame() {
   count.score = 0;
   platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
-  ball.position.set(0, yOffset + platform.geometry.parameters.height, distanciaPlanoPrimarioZ);
+  ball.position.set(0, yOffset + mesh2height/2, distanciaPlanoPrimarioZ);
   removeBricks();
   bricks = [];
   buildBricksPlan();
@@ -468,6 +534,7 @@ console.log(window.innerWidth);
 // primaryPlan.rotation.y = -0.1;
 
 
+
 render();
 function render() {
   keyboardUpdate();
@@ -475,4 +542,7 @@ function render() {
   requestAnimationFrame(render);
   renderer.render(scene, camera); // Render scene
 }
+
+
+
 

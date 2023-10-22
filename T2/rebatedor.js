@@ -111,9 +111,10 @@ function buildObjects()
    // Object 2 - Cube INTERSECT Cylinder
    csgObject = cubeCSG.intersect(cylinderCSG); // Execute intersection
    mesh2 = CSG.toMesh(csgObject, auxMat);
-   mesh2.material = new THREE.MeshPhongMaterial({color: 'lightgreen'});
+   mesh2.material = new THREE.MeshLambertMaterial({color: 'lightgreen'});
    mesh2.position.set(3, 0, 1); // Posição após a operação CSG
    mesh2.scale.x = 0.5;
+   mesh2.rotateY(THREE.MathUtils.degToRad(90));
    updateObject(mesh2); // Atualize a matriz do mesh2
    mesh2.position.set(2, 0, 2); // Posição final desejada para o mesh2
    updateObject(mesh2); // Atualize a matriz novamente após redefinir a posição
@@ -198,11 +199,12 @@ function addNormalArrowsWithinXRange(mesh) {
             // Crie e adicione a seta à cena
             const arrowHelper = new THREE.ArrowHelper(arrowDirection, vertexPosition, arrowLength, arrowColor);
             mesh.add(arrowHelper);
-            mesh.rotateY(THREE.MathUtils.degToRad(90));
+            // mesh.rotateY(THREE.MathUtils.degToRad(90));
             mesh.updateMatrix();// Adicionando a seta como um child do mesh garante que ela se mova com o mesh
         }
     }
 }
 
 // Uso:
-addNormalArrowsWithinXRange(mesh2);
+// addNormalArrowsWithinXRange(mesh2);
+
