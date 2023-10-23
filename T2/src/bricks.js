@@ -36,11 +36,9 @@ export function buildBricks(plan) {
   const bricks = [];
   let planeWidth = plan.geometry.parameters.width;
   let planeHeight = plan.geometry.parameters.height;
-  console.log("teste tamanho:" + planeHeight);
   let size = 0.038 * planeHeight;
   let startPositionX = -planeWidth / 2 + 0.11 * planeWidth;
   let startPositionY = planeHeight*0.4;
-  console.log("começo tijolo:" + startPositionY);
   // let spacing = 0.3 * size; // Defina o espaço entre os tijolos aqui
 
   level.forEach((row, indexRow) => {
@@ -51,7 +49,6 @@ export function buildBricks(plan) {
           y: startPositionY + indexRow * -(0.5 * (size)),
           z: 10 // Adicione o espaço aqui
         };
-        console.log("começo tijolo:" + startPositionY + indexRow * -(0.5 * (size + 2)));
         let color = colors[indexRow];
 
         bricks.push(addBrick(size, position, color));

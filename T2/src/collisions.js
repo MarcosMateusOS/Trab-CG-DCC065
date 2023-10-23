@@ -1,29 +1,47 @@
 import * as THREE from "three";
 
 // Função para verificar colisão da bola com a platforma
-export function checkPlatformCollision(platform, ball, ballVelocity) {
-  // Primeiro, criamos um 'bounding box' para a plataforma. Como a plataforma agora tem uma forma irregular,
-  // o 'bounding box' pode não corresponder perfeitamente aos seus limites.
-  const platformBox = new THREE.Box3().setFromObject(platform);
+export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
+  // Atualize o 'bounding box' da plataforma com base na geometria atual e na escala do objeto.
+  platform.geometry.computeBoundingBox();
+  let boundingBox = platform.geometry.boundingBox.clone(); // Clone o bounding box para evitar alterações no original.
 
-  // Em seguida, criamos uma esfera de colisão para a bola.
-  const ballSphere = new THREE.Sphere(ball.position, ball.geometry.parameters.radius);
+  // Ajuste o 'bounding box' com base na escala do objeto.
+  boundingBox.max.multiply(platform.scale);
+  boundingBox.min.multiply(platform.scale);
 
-  // Verificamos se o 'bounding box' da plataforma intersecta a esfera da bola.
-  if (platformBox.intersectsSphere(ballSphere)) {
-    // Se houver interseção, precisamos determinar o comportamento da bola.
-    // Por simplicidade, vamos apenas inverter a direção da bola, mas você pode implementar
-    // comportamentos mais complexos dependendo das necessidades do seu jogo.
+  // Ajuste o 'bounding box' com base na posição do objeto.
+  boundingBox.translate(platform.position);
 
-    // Se a bola estiver acima da plataforma, tratamos como uma colisão normal.
-    if (ballSphere.center.y > platformBox.max.y) {
-      // Calcular a posição relativa da colisão na plataforma.
-      const collisionPoint = new THREE.Vector3().copy(ball.position);
-      platform.worldToLocal(collisionPoint);
+  // Crie o 'bounding box' da bola.
+  let bbBall = new THREE.Box3().setFromObject(ball);
 
-      const relativeCollisionPoint = collisionPoint.x - platformBox.min.x;
-      const platformWidth = platformBox.max.x - platformBox.min.x;
-      const collisionX = (2 * relativeCollisionPoint - platformWidth) / platformWidth;
+  // Crie o 'bounding box' do rebatedor (platform).
+  let bbRebatedor = new THREE.Box3().setFromObject(platform);
+
+  // Verifique se o 'bounding box' da plataforma intersecta o 'bounding box' da bola.
+  if (bbBall.intersectsBox(bbRebatedor)) {
+      console.log("Colisão detectada");
+
+      // Obtenha o ponto de colisão no espaço mundial.
+      const collisionPointWorld = new THREE.Vector3().copy(ball.position);
+
+      // Calcule a posição relativa do ponto de colisão em relação ao bbRebatedor.
+      const relativeCollisionPoint = new THREE.Vector3().subVectors(collisionPointWorld, bbRebatedor.min);
+
+      // Calcule o tamanho do 'bounding box' do rebatedor.
+      const bbRebatedorSize = new THREE.Vector3();
+      bbRebatedor.getSize(bbRebatedorSize);
+
+      // Normalizar o ponto de colisão relativo com base no tamanho do 'bounding box' do rebatedor.
+      const normalizedCollisionPoint = new THREE.Vector3(
+          relativeCollisionPoint.x / bbRebatedorSize.x,
+          relativeCollisionPoint.y / bbRebatedorSize.y,
+          relativeCollisionPoint.z / bbRebatedorSize.z
+      );
+
+      // Transforme o intervalo de [0, 1] para [-1, 1] se você estiver interessado apenas na posição X.
+      const collisionX = normalizedCollisionPoint.x * 2 - 1;
 
       // Calcule o ângulo de saída com base na posição da colisão.
       const maxAngle = Math.PI / 4; // Ângulo máximo de saída.
@@ -32,19 +50,15 @@ export function checkPlatformCollision(platform, ball, ballVelocity) {
       // Mantenha a magnitude (comprimento) da velocidade constante após a colisão.
       const currentSpeed = ballVelocity.length();
       const newVelocity = new THREE.Vector3(
-        Math.sin(angle) * currentSpeed,
-        Math.cos(angle) * Math.abs(currentSpeed), // Garante que o eixo Y seja positivo.
-        0
+          Math.sin(angle) * currentSpeed,
+          Math.cos(angle) * Math.abs(currentSpeed),
+          0
       );
 
       ballVelocity.copy(newVelocity);
-    } else {
-      // Se a bola não estiver acima, pode ter atingido os lados ou a parte inferior da plataforma.
-      // Nesse caso, simplesmente invertemos a direção x da bola.
-      ballVelocity.x = -ballVelocity.x;
-    }
   }
 }
+
 
 export function checkBordersCollision(
   wallLeft,
@@ -98,22 +112,22 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
 
     // Verificar colisão na parte superior do tijolo
     if (ballPos.y  > brickMax.y) {
-      console.log("Colisão na parte de cima do tijolo");
+
       ballVelocity.y = -ballVelocity.y;
     }
     // Verificar colisão na parte inferior do tijolo
     else if (brickMin.y > ballPos.y) {
-      console.log("Colisão na parte de baixo do tijolo");
+
       ballVelocity.y = -ballVelocity.y;
     }
     // Verificar colisão na parte esquerda do tijolo
     else if (brickMin.x > ballPos.x) {
-      console.log("Colisão na parte esquerda do tijolo");
+
       ballVelocity.x = -ballVelocity.x;
     }
     // Verificar colisão na parte direita do tijolo
     else if (brickMax.x > ballPos.x) {
-      console.log("Colisão na parte direita do tijolo");
+
       ballVelocity.x = -ballVelocity.x;
     } 
 
@@ -122,6 +136,58 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
     brick.visible = false;
     
     count.score++;
-    console.log("iscore: ", count);
   }
 }
+
+
+
+function createBBHelper(bb, color,scene) {
+  // Create a bounding box helper
+  let helper = new THREE.Box3Helper(bb, color);
+  scene.add(helper);
+  return helper;
+}
+
+
+
+
+// function updateVisualBoundingBox(box, scene) {
+//   let visualBoundingBox;
+//   // Se já existe uma caixa delimitadora visual, remova-a
+//   if (visualBoundingBox) {
+//     scene.remove(visualBoundingBox);
+//   }
+
+//   // Crie uma nova geometria de caixa delimitadora baseada no 'box' fornecido
+//   const boxGeometry = new THREE.BoxGeometry(
+//     box.max.x - box.min.x,
+//     box.max.y - box.min.y,
+//     box.max.z - box.min.z
+//   );
+
+//   // Crie um material para a caixa delimitadora (wireframe)
+//   const boxMaterial = new THREE.LineBasicMaterial({
+//     color: 0xff0000, // cor vermelha para alta visibilidade
+//     wireframe: true
+//   });
+
+//   // Crie uma malha com a geometria e o material
+//   visualBoundingBox = new THREE.LineSegments(
+//     new THREE.EdgesGeometry(boxGeometry),
+//     boxMaterial
+//   );
+
+//   // Posicione a caixa delimitadora visual
+//   visualBoundingBox.position.set(
+//     (box.min.x + box.max.x) / 2,
+//     (box.min.y + box.max.y) / 2,
+//     (box.min.z + box.max.z) / 2
+//   );
+
+//   // Adicione a caixa delimitadora visual à cena
+//   scene.add(visualBoundingBox);
+// }
+
+
+
+
