@@ -20,7 +20,7 @@ import { buildBricks } from "./src/bricks.js";
 import { Material, SphereGeometry } from "../build/three.module.js";
 
 var count = { score: 0 };
-var currentLevel = 2;
+var currentLevel = 1;
 
 let scene, renderer, camera;
 scene = new THREE.Scene();

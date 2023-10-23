@@ -1,36 +1,38 @@
 import * as THREE from "three";
 
+import { handleBrick } from "./bricks.js";
+
 // Função para verificar colisão da bola com a platforma
 export function checkPlatformCollision(platform, ball, ballVelocity) {
-  
   const paddleBox = new THREE.Box3().setFromObject(platform);
-  const ballSphere = new THREE.Sphere(ball.position,ball.geometry.parameters.radius);
+  const ballSphere = new THREE.Sphere(
+    ball.position,
+    ball.geometry.parameters.radius
+  );
 
   if (paddleBox.intersectsSphere(ballSphere)) {
     // Calcule a posição relativa da colisão na platforma (-1 a 1, onde -1 é à esquerda e 1 é à direita)
-    if(ballSphere.center.y > paddleBox.max.y){
-    const collisionPoint = new THREE.Vector3().copy(ball.position);
-    platform.worldToLocal(collisionPoint);
-    const collisionX =
-      collisionPoint.x / (platform.geometry.parameters.width / 2);
-    // var collisionY = collisionPoint.y
-    // console.log(collisionY)
-    // Calcule o ângulo de saída com base na posição da colisão
-    const maxAngle = Math.PI / 4; // Ângulo máximo de saída
-    const angle = maxAngle * collisionX;
+    if (ballSphere.center.y > paddleBox.max.y) {
+      const collisionPoint = new THREE.Vector3().copy(ball.position);
+      platform.worldToLocal(collisionPoint);
+      const collisionX =
+        collisionPoint.x / (platform.geometry.parameters.width / 2);
+      // var collisionY = collisionPoint.y
+      // console.log(collisionY)
+      // Calcule o ângulo de saída com base na posição da colisão
+      const maxAngle = Math.PI / 4; // Ângulo máximo de saída
+      const angle = maxAngle * collisionX;
 
-    // Mantenha a magnitude (comprimento) da velocidade constante após a colisão
-    const currentSpeed = ballVelocity.length();
-    const newVelocity = new THREE.Vector3(
-      Math.sin(angle) * currentSpeed,
-      Math.cos(angle) * Math.abs(currentSpeed), // Garante o eixoq Y positivo
-      0
-    );
+      // Mantenha a magnitude (comprimento) da velocidade constante após a colisão
+      const currentSpeed = ballVelocity.length();
+      const newVelocity = new THREE.Vector3(
+        Math.sin(angle) * currentSpeed,
+        Math.cos(angle) * Math.abs(currentSpeed), // Garante o eixoq Y positivo
+        0
+      );
 
-    ballVelocity.copy(newVelocity);
-    }
-    else
-    {
+      ballVelocity.copy(newVelocity);
+    } else {
       if (paddleBox.max.x < ballSphere.center.x) {
         console.log("Colisão na parte direita da plataforma");
         ballVelocity.x = -ballVelocity.x;
@@ -87,15 +89,19 @@ export function checkBordersCollision(
 // Função para verificar colisão da bola com os tijolos
 export function checkBrickCollision(brick, ball, ballVelocity, count) {
   const brickBox = new THREE.Box3().setFromObject(brick);
-  const ballSphere = new THREE.Sphere(ball.position,ball.geometry.parameters.radius);
+  const ballSphere = new THREE.Sphere(
+    ball.position,
+    ball.geometry.parameters.radius
+  );
 
   if (brickBox.intersectsSphere(ballSphere)) {
+    console.log("brick colidiu: ", brick.material.color.getHexString());
     const ballPos = ballSphere.center;
     let brickMax = brickBox.max;
     let brickMin = brickBox.min;
 
     // Verificar colisão na parte superior do tijolo
-    if (ballPos.y  > brickMax.y) {
+    if (ballPos.y > brickMax.y) {
       console.log("Colisão na parte de cima do tijolo");
       ballVelocity.y = -ballVelocity.y;
     }
@@ -115,11 +121,6 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
       ballVelocity.x = -ballVelocity.x;
     }
 
-    // Mover o tijolo para fora da cena e torná-lo invisível
-    brick.position.set(1000, 1000, 1000);
-    brick.visible = false;
-    
-    count.score++;
-    console.log("iscore: ", count);
+    handleBrick(brick, count);
   }
 }

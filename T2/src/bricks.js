@@ -5,14 +5,37 @@ export default function addBrick(size, position, color) {
   const height = 0.5 * size;
 
   const geometry = new THREE.BoxGeometry(1, 1, 1);
-  const material = new THREE.MeshBasicMaterial({ color: color });
+  const material = new THREE.MeshPhongMaterial({ color: color });
   const brick = new THREE.Mesh(geometry, material);
 
   brick.position.set(position.x, position.y, 30);
   brick.scale.set(width, height, 1);
   brick.castShadow = true;
+
+  if (color === "#BCBBBC") brick.hitCount = 1;
+  else brick.hitCount = 0;
+
   return brick;
 }
+
+export function handleBrick(brick, count) {
+  console.log("handleBrick ativado. ", brick.hitCount);
+
+  if (brick.hitCount > 0) {
+    console.log("esse aq hita mttt: ", brick.hitCount);
+    brick.material.color = new THREE.Color("#888888");
+    brick.hitCount--;
+  } else {
+    console.log("esse aq hita nddd: ", brick.hitCount);
+    // Mover o tijolo para fora da cena e torná-lo invisível
+    brick.position.set(1000, 1000, 1000);
+    brick.visible = false;
+
+    count.score++;
+    console.log("iscore: ", count);
+  }
+}
+
 export function buildBricks(plan, currentLevel) {
   const level1 = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
