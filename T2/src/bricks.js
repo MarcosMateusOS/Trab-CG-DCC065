@@ -4,34 +4,74 @@ export default function addBrick(size, position, color) {
   const width = size;
   const height = 0.5 * size;
 
-  const geometry = new THREE.BoxGeometry(1, 1, height*1);
-  const material = new THREE.MeshLambertMaterial({ color: color });
+  const geometry = new THREE.BoxGeometry(1, 1, height * 1);
+  const material = new THREE.MeshPhongMaterial({ color: color });
   const brick = new THREE.Mesh(geometry, material);
 
-  brick.position.set(position.x, position.y,position.z);
+  brick.position.set(position.x, position.y, position.z);
   brick.scale.set(width, height, 1);
   brick.castShadow = true;
- 
-  
- 
- 
- 
-  
- 
- 
+
+  if (color === "#BCBBBC") brick.hitCount = 1;
+  else brick.hitCount = 0;
+
   return brick;
 }
-export function buildBricks(plan) {
-  const level = [
-    [1, 1, 1, 1, 1,1,1,1,1,1,1],
-    [1, 1, 1, 1, 1,1,1,1,1,1,1],
-    [1, 1, 1, 1, 1,1,1,1,1,1,1],
-    [1, 1, 1, 1, 1,1,1,1,1,1,1],
-    [1, 1, 1, 1, 1,1,1,1,1,1,1],
-    [1, 1, 1, 1, 1,1,1,1,1,1,1],
+
+export function handleBrick(brick, count) {
+  console.log("handleBrick ativado. ", brick.hitCount);
+
+  if (brick.hitCount > 0) {
+    console.log("esse aq hita mttt: ", brick.hitCount);
+    brick.material.color = new THREE.Color("#888888");
+    brick.hitCount--;
+  } else {
+    console.log("esse aq hita nddd: ", brick.hitCount);
+    // Mover o tijolo para fora da cena e torná-lo invisível
+    brick.position.set(1000, 1000, 1000);
+    brick.visible = false;
+
+    count.score++;
+    console.log("iscore: ", count);
+  }
+}
+
+export function buildBricks(plan, currentLevel) {
+  const level1 = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ];
 
-  const colors = ["#800080", "#FF0000", "#AD0FF6", "#FFA500", "#0F40CB", "#006400"];
+  const level2 = [
+    [1, 4, 6, 5, 0, 4, 6, 3, 1],
+    [3, 6, 4, 2, 0, 6, 4, 1, 3],
+    [6, 5, 2, 4, 0, 3, 1, 4, 6],
+    [4, 2, 5, 6, 0, 1, 3, 6, 4],
+    [2, 4, 6, 3, 0, 4, 6, 5, 2],
+    [5, 6, 4, 1, 0, 6, 4, 2, 5],
+    [6, 3, 1, 4, 0, 5, 2, 4, 6],
+    [4, 1, 3, 6, 0, 2, 5, 6, 4],
+    [1, 4, 6, 5, 0, 4, 6, 3, 1],
+    [3, 6, 4, 2, 0, 6, 4, 1, 3],
+    [6, 5, 2, 4, 0, 3, 1, 4, 6],
+    [4, 2, 5, 6, 0, 1, 3, 6, 4],
+    [2, 4, 6, 3, 0, 4, 6, 5, 2],
+    [5, 6, 4, 1, 0, 6, 4, 2, 5],
+  ];
+
+  const colors = [
+    //         // vazio     - 0
+    "#BCBBBC", // cinza     - 1
+    "#C71E0F", // vermelho  - 2
+    "#006FEA", // azul      - 3
+    "#Fb9737", // laranja   - 4
+    "#FC74B4", // rosa      - 5
+    "#80D010", // verde     - 6
+  ];
 
   const bricks = [];
   let planeWidth = plan.geometry.parameters.width;
@@ -39,26 +79,45 @@ export function buildBricks(plan) {
   console.log("teste tamanho:" + planeHeight);
   let size = 0.038 * planeHeight;
   let startPositionX = -planeWidth / 2 + 0.11 * planeWidth;
-  let startPositionY = planeHeight*0.4;
+  let startPositionY = planeHeight * 0.4;
   console.log("começo tijolo:" + startPositionY);
   // let spacing = 0.3 * size; // Defina o espaço entre os tijolos aqui
 
-  level.forEach((row, indexRow) => {
-    row.forEach((brick, indexBrick) => {
-      if (brick === 1) {
-        let position = {
-          x: startPositionX + indexBrick * (size), // Adicione o espaço aqui
-          y: startPositionY + indexRow * -(0.5 * (size)),
-          z: 10 // Adicione o espaço aqui
-        };
-        console.log("começo tijolo:" + startPositionY + indexRow * -(0.5 * (size + 2)));
-        let color = colors[indexRow];
+  if (currentLevel === 1) {
+    level1.forEach((row, indexRow) => {
+      row.forEach((brick, indexBrick) => {
+        if (brick === 1) {
+          let position = {
+            x: 7.5 + startPositionX + indexBrick * size, // Adicione o espaço aqui
+            y: startPositionY + indexRow * -(0.5 * size),
+            z: 10, // Adicione o espaço aqui
+          };
+          console.log(
+            "começo tijolo:" + startPositionY + indexRow * -(0.5 * (size + 2))
+          );
+          let color = colors[indexRow];
 
-        bricks.push(addBrick(size, position, color));
-      }
+          bricks.push(addBrick(size, position, color));
+        }
+      });
+    });
+  } else if (currentLevel === 2) {
+    level2.forEach((row, indexRow) => {
+      row.forEach((brick, indexBrick) => {
+        if (brick !== 0) {
+          let position = {
+            x: 7.5 + startPositionX + indexBrick * (size + 5),
+            y: startPositionY + indexRow * -(0.5 * (size + 5)),
+            z: 10,
+          };
+
+          let color = colors[brick - 1];
+
+          bricks.push(addBrick(size, position, color));
+        }
+      });
     });
   }
-  );
 
   return bricks;
 }

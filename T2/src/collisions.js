@@ -1,5 +1,7 @@
 import * as THREE from "three";
 
+import { handleBrick } from "./bricks.js";
+
 // Função para verificar colisão da bola com a platforma
 export function checkPlatformCollision(platform, ball, ballVelocity) {
   const paddleBox = new THREE.Box3().setFromObject(platform);
@@ -93,6 +95,7 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
   );
 
   if (brickBox.intersectsSphere(ballSphere)) {
+    console.log("brick colidiu: ", brick.material.color.getHexString());
     const ballPos = ballSphere.center;
     let brickMax = brickBox.max;
     let brickMin = brickBox.min;
@@ -118,12 +121,7 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
       ballVelocity.x = -ballVelocity.x;
     }
 
-    // Mover o tijolo para fora da cena e torná-lo invisível
-    brick.position.set(1000, 1000, 1000);
-    brick.visible = false;
-
-    count.score++;
-    console.log("iscore: ", count);
+    handleBrick(brick, count);
   }
 }
 

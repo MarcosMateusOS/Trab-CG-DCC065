@@ -28,6 +28,7 @@ import {
 } from "../build/three.module.js";
 
 var count = { score: 0 };
+var currentLevel = 1;
 
 let scene, renderer, camera;
 scene = new THREE.Scene();
@@ -122,7 +123,7 @@ ballVelocity.multiplyScalar(newBallVelocity);
 //updateDimensions();
 let bricks;
 function buildBricksPlan() {
-  bricks = buildBricks(primaryPlan);
+  bricks = buildBricks(primaryPlan, currentLevel);
 
   bricks.forEach((brick) => {
     scene.add(brick);
@@ -338,6 +339,7 @@ function animate() {
     );
 
     if (isLose) {
+      currentLevel = 1;
       resetGame();
     }
     bricks.forEach((brick) => {
@@ -591,7 +593,16 @@ function fullScreen() {
 function keyboardUpdate() {
   keyboard.update();
 
-  if (keyboard.down("R")) resetGame();
+  if (keyboard.down("R")) {
+    currentLevel = 1;
+    resetGame();
+  }
+
+  if (keyboard.down("G")) {
+    currentLevel = 2;
+    resetGame();
+  }
+
   if (keyboard.down("space")) {
     if (!isPaused) {
       pause();
