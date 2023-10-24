@@ -80,47 +80,80 @@ let mesh1, mesh2, mesh3;
 buildInterface();
 buildObjects();
 render();
-
-function buildObjects()
-{
+function buildObjects() {
+    //Criação novo rebatedor
+   let mesh2;
    let auxMat = new THREE.Matrix4();
    
    // Base objects
    let cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshPhongMaterial({color: 'red'})); // Adicionado material para diferenciação
    let cylinderMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 2, 17), new THREE.MeshPhongMaterial({color: 'blue'})); // Adicionado material para diferenciação
-   
+   cylinderMesh.rotation.z = THREE.MathUtils.degToRad(90);
+   cylinderMesh.rotation.y = THREE.MathUtils.degToRad(90);
    // Posicione e atualize os objetos originais
-   cubeMesh.position.set(0,1, 0); // ou qualquer outra posição desejada
-   cylinderMesh.position.set(1, -0.5, 0.0); // a posição é ajustada para corresponder à operação CSG
+   cubeMesh.position.set(0,1, 2); // ou qualquer outra posição desejada
+   cylinderMesh.position.set(0, -0.5, 1); // a posição é ajustada para corresponder à operação CSG
 
    // Atualize as matrizes dos objetos
    updateObject(cubeMesh);
    updateObject(cylinderMesh);
 
    // Adicione os objetos originais à cena
-//    scene.add(cubeMesh);
-//    scene.add(cylinderMesh);
+    //  scene.add(cubeMesh);
+    //  scene.add(cylinderMesh);
 
    // CSG holders
    let csgObject, cubeCSG, cylinderCSG;
 
    // Prepare os objetos para operações CSG
+   cubeMesh.position.set(0, 1, 0);
+   cylinderMesh.position.set(0, -0.5, 0.0);
+   
+   // Prepare os objetos para operações CSG
    cubeCSG = CSG.fromMesh(cubeMesh);
    cylinderCSG = CSG.fromMesh(cylinderMesh);
-
+   
    // Object 2 - Cube INTERSECT Cylinder
    csgObject = cubeCSG.intersect(cylinderCSG); // Execute intersection
+   // Após a operação CSG, crie mesh2
    mesh2 = CSG.toMesh(csgObject, auxMat);
-   mesh2.material = new THREE.MeshPhongMaterial({color: 'lightgreen'});
-   mesh2.position.set(3, 0, 1); // Posição após a operação CSG
-   mesh2.scale.x = 0.5;
-   updateObject(mesh2); // Atualize a matriz do mesh2
-   mesh2.position.set(2, 0, 2); // Posição final desejada para o mesh2
-   updateObject(mesh2); // Atualize a matriz novamente após redefinir a posição
+   mesh2.material = new THREE.MeshLambertMaterial({color: 'green'});
 
-   // Adicione o resultado da operação CSG à cena
+   // Calcule a caixa delimitadora de mesh2
+   mesh2.geometry.computeBoundingBox();
+
+   // Encontre o centro da caixa delimitadora
+   let boundingBoxCenter = new THREE.Vector3();
+   mesh2.geometry.boundingBox.getCenter(boundingBoxCenter);
+
+   // Defina o ponto desejado para o centro da caixa delimitadora
+   let desiredPosition = new THREE.Vector3(0, 1, 0);
+
+   // Calcule o deslocamento necessário subtraindo o centro atual da posição desejada
+   let displacement = new THREE.Vector3().subVectors(desiredPosition, boundingBoxCenter);
+
+   // Ajuste a posição de mesh2 adicionando o deslocamento
+   mesh2.position.add(displacement);
+
+   // Certifique-se de que matrixAutoUpdate está ativo para mesh2
+   mesh2.matrixAutoUpdate = true;
+
+   // Adicione mesh2 à cena
    scene.add(mesh2);
+   mesh2.position.y = 0;
+   
+//    mesh2.geometry.computeBoundingBox();
+
+//    let newboudingBoxCenter = new THREE.Vector3();
+//    mesh2.geometry.boundingBox.getCenter(newboudingBoxCenter);
+//    let newDesiredPosition = new THREE.Vector3(1, 0, 0);
+
+//    let newDisplacement = new THREE.Vector3().subVectors(newDesiredPosition,newboudingBoxCenter);
+//    mesh2.position.add(newDisplacement);
+
+
 }
+ 
 function updateObject(mesh)
 {
    mesh.matrixAutoUpdate = false;
@@ -198,11 +231,12 @@ function addNormalArrowsWithinXRange(mesh) {
             // Crie e adicione a seta à cena
             const arrowHelper = new THREE.ArrowHelper(arrowDirection, vertexPosition, arrowLength, arrowColor);
             mesh.add(arrowHelper);
-            mesh.rotateY(THREE.MathUtils.degToRad(90));
+            // mesh.rotateY(THREE.MathUtils.degToRad(90));
             mesh.updateMatrix();// Adicionando a seta como um child do mesh garante que ela se mova com o mesh
         }
     }
 }
 
 // Uso:
-addNormalArrowsWithinXRange(mesh2);
+// addNormalArrowsWithinXRange(mesh2);
+

@@ -113,7 +113,8 @@ function buildObjects()
    csgObject = cubeCSG.intersect(cylinderCSG) // Execute intersection
    mesh2 = CSG.toMesh(csgObject, auxMat)
    mesh2.material = new THREE.MeshPhongMaterial({color: 'lightblue'})
-   mesh2.position.set(3, 0, 0.9)
+   mesh2.position.set(0, 0, 0)
+   mesh2.position.set
    scene.add(mesh2)
 
    // Object 3 - Cube UNION torus
@@ -128,6 +129,9 @@ function buildObjects()
    mesh3.material = new THREE.MeshPhongMaterial({color: 'indianred'})
    mesh3.position.set(-4, 0, 1.02)
    scene.add(mesh3)
+
+
+   
 }
 
 function updateObject(mesh)

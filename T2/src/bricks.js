@@ -76,7 +76,6 @@ export function buildBricks(plan, currentLevel) {
   const bricks = [];
   let planeWidth = plan.geometry.parameters.width;
   let planeHeight = plan.geometry.parameters.height;
-  console.log("teste tamanho:" + planeHeight);
   let size = 0.038 * planeHeight;
   let startPositionX = -planeWidth / 2 + 0.11 * planeWidth;
   let startPositionY = planeHeight * 0.4;
@@ -88,7 +87,7 @@ export function buildBricks(plan, currentLevel) {
       row.forEach((brick, indexBrick) => {
         if (brick === 1) {
           let position = {
-            x: 7.5 + startPositionX + indexBrick * size, // Adicione o espaço aqui
+            x: 10 + startPositionX + indexBrick * size, // Adicione o espaço aqui
             y: startPositionY + indexRow * -(0.5 * size),
             z: 10, // Adicione o espaço aqui
           };
@@ -106,8 +105,8 @@ export function buildBricks(plan, currentLevel) {
       row.forEach((brick, indexBrick) => {
         if (brick !== 0) {
           let position = {
-            x: 7.5 + startPositionX + indexBrick * (size + 5),
-            y: startPositionY + indexRow * -(0.5 * (size + 5)),
+            x: 30 + startPositionX + indexBrick * (size),
+            y: startPositionY + indexRow * -(0.5 * (size)),
             z: 10,
           };
 
