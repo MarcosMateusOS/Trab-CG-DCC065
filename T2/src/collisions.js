@@ -103,9 +103,19 @@ export function checkBordersCollision(
 
   return false;
 }
+// Variável para armazenar o tempo da última colisão
+let lastCollisionTime = 0;
+const collisionCooldown = 100; // Tempo de cooldown em milissegundos (ajuste conforme necessário)
 
-// Função para verificar colisão da bola com os tijolos
 export function checkBrickCollision(brick, ball, ballVelocity, count) {
+  // Obter o tempo atual
+  const currentTime = new Date().getTime();
+
+  // Se não passou tempo suficiente desde a última colisão, simplesmente retorne
+  if (currentTime - lastCollisionTime < collisionCooldown) {
+    return;
+  }
+
   const brickBox = new THREE.Box3().setFromObject(brick);
   const ballSphere = new THREE.Sphere(
     ball.position,
@@ -113,6 +123,9 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
   );
 
   if (brickBox.intersectsSphere(ballSphere)) {
+    // Atualizar o tempo da última colisão
+    lastCollisionTime = currentTime;
+
     console.log("brick colidiu: ", brick.material.color.getHexString());
     const ballPos = ballSphere.center;
     let brickMax = brickBox.max;
@@ -138,6 +151,7 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
     handleBrick(brick, count);
   }
 }
+
 
 function createBBHelper(bb, color, scene) {
   // Create a bounding box helper
