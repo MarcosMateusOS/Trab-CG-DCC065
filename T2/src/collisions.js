@@ -23,8 +23,6 @@ export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
 
   // Verifique se o 'bounding box' da plataforma intersecta o 'bounding box' da bola.
   if (bbBall.intersectsBox(bbRebatedor)) {
-    console.log("Colisão detectada");
-
     // Obtenha o ponto de colisão no espaço mundial.
     const collisionPointWorld = new THREE.Vector3().copy(ball.position);
 
@@ -151,7 +149,6 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
     handleBrick(brick, count);
   }
 }
-
 
 function createBBHelper(bb, color, scene) {
   // Create a bounding box helper

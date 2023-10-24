@@ -227,7 +227,11 @@ const textVelocityMesh = new THREE.Mesh(
   textVelocityGeometry,
   textVelocityMaterial
 );
-textVelocityMesh.position.set(75, yOffset + 720, 30);
+textVelocityMesh.position.set(
+  wallRigth.position.x - 145,
+  wallTop.position.y - 60,
+  30
+);
 textVelocityMesh.name = "textVelocity";
 scene.add(textVelocityMesh);
 
@@ -239,7 +243,11 @@ const textScoreGeometry = new TextGeometry(textScore, {
 });
 const textScoreMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
 const textScoreMesh = new THREE.Mesh(textScoreGeometry, textScoreMaterial);
-textScoreMesh.position.set(wallLeft.position.x + 35, yOffset + 720, 30);
+textScoreMesh.position.set(
+  wallLeft.position.x + 35,
+  wallTop.position.y - 60,
+  30
+);
 textScoreMesh.name = "textScore";
 scene.add(textScoreMesh);
 
@@ -266,62 +274,44 @@ function updateInfos() {
 const textureLoader = new TextureLoader();
 const texture = await textureLoader.loadAsync("./utils/energy.jpg");
 
-const lerpConfig = {
-  destination: new THREE.Vector3(
-    wallBottom.position.x,
-    wallBottom.position.y,
-    distanciaPlanoPrimarioZ
-  ),
-  alpha: 0.03,
-  angle: 0.0,
-  move: false,
-};
-
 let size = 0.025 * primaryPlan.geometry.parameters.height;
 let heightPowerUp = size * 0.5;
 const geometryPowerUp = new THREE.BoxGeometry(1, 1, heightPowerUp * 1);
 const materialPowerUp = new THREE.MeshLambertMaterial({ map: texture });
 const powerUp = new THREE.Mesh(geometryPowerUp, materialPowerUp);
+const randX = Math.floor(
+  Math.random() *
+    (Math.floor(wallRigth.position.x) - Math.floor(wallLeft.position.x)) +
+    Math.floor(wallLeft.position.x)
+);
 
-powerUp.position.set(0, yOffset + 400, distanciaPlanoPrimarioZ);
+powerUp.position.set(randX, yOffset + 400, distanciaPlanoPrimarioZ);
 powerUp.scale.set(size, size * 0.5, 1);
 powerUp.castShadow = true;
 powerUp.visible = false;
 scene.add(powerUp);
 
-function removePowerUp() {
-  const object = scene.getObjectByProperty("uuid", powerUp.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
-
-  scene.remove(object);
-}
-
-let countPowerUp = 0;
-function showPowerUp() {
-  powerUp.visible = true;
-  lerpConfig.move = true;
-  powerUp.position.lerp(lerpConfig.destination, lerpConfig.alpha);
-}
-
-function putPowerUp() {
-  powerUp.visible = false;
-  powerUp.position.set(
-    wallBottom.position.x,
+const lerpConfig = {
+  destination: new THREE.Vector3(
+    powerUp.position.x,
     wallBottom.position.y,
     distanciaPlanoPrimarioZ
-  );
-  lerpConfig.move = false;
-
-  duplicateBall();
-}
+  ),
+  alpha: 0.01,
+  move: false,
+};
 
 function resetPowerUp() {
   powerUp.visible = false;
-  powerUp.position.set(
-    wallBottom.position.x,
-    wallBottom.position.y,
-    distanciaPlanoPrimarioZ
+  const randX = Math.floor(
+    Math.random() *
+      (Math.floor(wallRigth.position.x) - Math.floor(wallLeft.position.x)) +
+      Math.floor(wallLeft.position.x)
   );
+
+  powerUp.position.set(randX, yOffset + 400, distanciaPlanoPrimarioZ);
   lerpConfig.move = false;
+  isActivePowerUp = true;
 }
 
 let clonedBall;
@@ -342,6 +332,7 @@ function duplicateBall() {
   clonedBall.position.z = distanciaPlanoPrimarioZ;
   clonedBall.position.x += clonedBallVelocity.x;
   clonedBall.position.y += clonedBallVelocity.y;
+  isActivePowerUp = false;
 }
 
 function removeClonedBall() {
@@ -349,7 +340,44 @@ function removeClonedBall() {
     const object = scene.getObjectByProperty("uuid", clonedBall.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
 
     scene.remove(object);
+    isActivePowerUp = true;
   }
+}
+
+let countPowerUp = 0;
+let isActivePowerUp = true;
+function showPowerUp() {
+  powerUp.visible = true;
+  isActivePowerUp = false;
+  lerpConfig.move = true;
+}
+
+function putPowerUp() {
+  powerUp.visible = false;
+  const randX = Math.floor(
+    Math.random() *
+      (Math.floor(wallRigth.position.x) - Math.floor(wallLeft.position.x)) +
+      Math.floor(wallLeft.position.x)
+  );
+
+  powerUp.position.set(randX, yOffset + 400, distanciaPlanoPrimarioZ);
+  lerpConfig.move = false;
+  isActivePowerUp = true;
+
+  duplicateBall();
+}
+
+let lastScore = 0;
+function checkScore() {
+  if (count.score < 10) {
+    return false;
+  }
+
+  if (lastScore % 10 == 0 || count.score % 10 == 0) {
+    return true;
+  }
+
+  return false;
 }
 // animação bola
 let checkTime = 0;
@@ -358,6 +386,7 @@ function animate() {
   updateInfos();
   if (start) {
     countPowerUp = count.score;
+    lastScore = count.score - 1;
     checkTime += 1 / 60;
 
     if (checkTime <= 15) {
@@ -410,8 +439,8 @@ function animate() {
         checkBrickCollision(brick, clonedBall, clonedBallVelocity, count);
       }
     });
-
-    if (count.score % 10 == 0 && count.score != 0) {
+    console.log(checkScore() && isActivePowerUp);
+    if (checkScore() && isActivePowerUp) {
       showPowerUp();
     }
 
@@ -419,8 +448,12 @@ function animate() {
       putPowerUp();
     }
 
-    if (lerpConfig.move && checkPowerUpIsInDestination(wallBottom, powerUp)) {
+    if (checkPowerUpIsInDestination(wallBottom, powerUp)) {
       resetPowerUp();
+    }
+
+    if (lerpConfig.move) {
+      powerUp.position.lerp(lerpConfig.destination, lerpConfig.alpha);
     }
 
     // if (count.score === 15) {
@@ -545,11 +578,23 @@ function resetGame() {
   count.score = 0;
   // platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
+
   ball.position.set(0, yOffset + mesh2height / 2, distanciaPlanoPrimarioZ);
   removeBricks();
   removeClonedBall();
   bricks = [];
   buildBricksPlan();
+
+  lerpConfig.move = false;
+  isActivePowerUp = true;
+  const randX = Math.floor(
+    Math.random() *
+      (Math.floor(wallRigth.position.x) - Math.floor(wallLeft.position.x)) +
+      Math.floor(wallLeft.position.x)
+  );
+  powerUp.position.set(randX, yOffset + 400, distanciaPlanoPrimarioZ);
+  powerUp.visible = false;
+
   if (isPaused) {
     resume();
   }
