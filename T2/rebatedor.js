@@ -82,76 +82,73 @@ buildObjects();
 render();
 function buildObjects() {
     //Criação novo rebatedor
-   let mesh2;
-   let auxMat = new THREE.Matrix4();
-   
-   // Base objects
-   let cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshPhongMaterial({color: 'red'})); // Adicionado material para diferenciação
-   let cylinderMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 2, 17), new THREE.MeshPhongMaterial({color: 'blue'})); // Adicionado material para diferenciação
-   cylinderMesh.rotation.z = THREE.MathUtils.degToRad(90);
-   cylinderMesh.rotation.y = THREE.MathUtils.degToRad(90);
-   // Posicione e atualize os objetos originais
-   cubeMesh.position.set(0,1, 2); // ou qualquer outra posição desejada
-   cylinderMesh.position.set(0, -0.5, 1); // a posição é ajustada para corresponder à operação CSG
+   //Criação novo rebatedor
+let mesh2;
+let auxMat = new THREE.Matrix4();
 
-   // Atualize as matrizes dos objetos
-   updateObject(cubeMesh);
-   updateObject(cylinderMesh);
+// Base objects
+let cubeMesh = new THREE.Mesh(
+  new THREE.BoxGeometry(2, 2, 2),
+  new THREE.MeshPhongMaterial({ color: "red" })
+); // Adicionado material para diferenciação
+let cylinderMesh = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.85, 0.85, 2, 17),
+  new THREE.MeshPhongMaterial({ color: "blue" })
+); // Adicionado material para diferenciação
 
-   // Adicione os objetos originais à cena
-    //  scene.add(cubeMesh);
-    //  scene.add(cylinderMesh);
+// Posicione e atualize os objetos originais
+cubeMesh.position.set(0, 1, 0); // ou qualquer outra posição desejada
+cylinderMesh.position.set(1, -0.5, 0.0); // a posição é ajustada para corresponder à operação CSG
 
-   // CSG holders
-   let csgObject, cubeCSG, cylinderCSG;
+// Atualize as matrizes dos objetos
+updateObject(cubeMesh);
+updateObject(cylinderMesh);
 
-   // Prepare os objetos para operações CSG
-   cubeMesh.position.set(0, 1, 0);
-   cylinderMesh.position.set(0, -0.5, 0.0);
-   
-   // Prepare os objetos para operações CSG
-   cubeCSG = CSG.fromMesh(cubeMesh);
-   cylinderCSG = CSG.fromMesh(cylinderMesh);
-   
-   // Object 2 - Cube INTERSECT Cylinder
-   csgObject = cubeCSG.intersect(cylinderCSG); // Execute intersection
-   // Após a operação CSG, crie mesh2
-   mesh2 = CSG.toMesh(csgObject, auxMat);
-   mesh2.material = new THREE.MeshLambertMaterial({color: 'green'});
+// Adicione os objetos originais à cena
+//    scene.add(cubeMesh);
+//    scene.add(cylinderMesh);
 
-   // Calcule a caixa delimitadora de mesh2
-   mesh2.geometry.computeBoundingBox();
+// CSG holders
+let csgObject, cubeCSG, cylinderCSG;
 
-   // Encontre o centro da caixa delimitadora
-   let boundingBoxCenter = new THREE.Vector3();
-   mesh2.geometry.boundingBox.getCenter(boundingBoxCenter);
+// Prepare os objetos para operações CSG
+cubeMesh.position.set(0, 1, 0);
+cylinderMesh.position.set(1, -0.5, 0.0);
 
-   // Defina o ponto desejado para o centro da caixa delimitadora
-   let desiredPosition = new THREE.Vector3(0, 1, 0);
+// Prepare os objetos para operações CSG
+cubeCSG = CSG.fromMesh(cubeMesh);
+cylinderCSG = CSG.fromMesh(cylinderMesh);
 
-   // Calcule o deslocamento necessário subtraindo o centro atual da posição desejada
-   let displacement = new THREE.Vector3().subVectors(desiredPosition, boundingBoxCenter);
+// Object 2 - Cube INTERSECT Cylinder
+csgObject = cubeCSG.intersect(cylinderCSG); // Execute intersection
+mesh2 = CSG.toMesh(csgObject, auxMat);
+mesh2.material = new THREE.MeshLambertMaterial({ color: "green" });
 
-   // Ajuste a posição de mesh2 adicionando o deslocamento
-   mesh2.position.add(displacement);
+// Aplique transformações ao mesh2
+mesh2.position.set(3, 0, 10); // Posição inicial
+mesh2.scale.set(0.5, 0.5, 0.5); // Aplicando escala
+mesh2.rotation.y = THREE.MathUtils.degToRad(90); // Aplicando rotação em Y
+mesh2.rotation.z = THREE.MathUtils.degToRad(270); // Aplicando rotação em Z
 
-   // Certifique-se de que matrixAutoUpdate está ativo para mesh2
-   mesh2.matrixAutoUpdate = true;
+// Posição final desejada para o mesh2
+mesh2.position.set(0, 0, 5);
 
-   // Adicione mesh2 à cena
-   scene.add(mesh2);
-   mesh2.position.y = 0;
-   
-//    mesh2.geometry.computeBoundingBox();
+// Ajuste a escala com base na geometria do plano primário
+mesh2.scale.set(
+  2.5,
+  2.5,
+  5
+);
 
-//    let newboudingBoxCenter = new THREE.Vector3();
-//    mesh2.geometry.boundingBox.getCenter(newboudingBoxCenter);
-//    let newDesiredPosition = new THREE.Vector3(1, 0, 0);
+// Não é necessário chamar updateObject, pois matrixAutoUpdate é true por padrão
+mesh2.geometry.computeBoundingBox();
+let boundingBox = mesh2.geometry.boundingBox;
+let mesh2width = boundingBox.max.x - boundingBox.min.x;
+let mesh2height = boundingBox.max.y - boundingBox.min.y;
+mesh2width *= mesh2.scale.x; // Ajustando a largura com base na escala do objeto
+mesh2height *= mesh2.scale.y; // Ajustando a altura com base na escala do objeto
 
-//    let newDisplacement = new THREE.Vector3().subVectors(newDesiredPosition,newboudingBoxCenter);
-//    mesh2.position.add(newDisplacement);
-
-
+scene.add(mesh2);
 }
  
 function updateObject(mesh)

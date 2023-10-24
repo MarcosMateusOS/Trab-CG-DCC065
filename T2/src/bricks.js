@@ -105,7 +105,7 @@ export function buildBricks(plan, currentLevel) {
       row.forEach((brick, indexBrick) => {
         if (brick !== 0) {
           let position = {
-            x: 30 + startPositionX + indexBrick * (size),
+            x: 42 + startPositionX + indexBrick * (size),
             y: startPositionY + indexRow * -(0.5 * (size)),
             z: 10,
           };
