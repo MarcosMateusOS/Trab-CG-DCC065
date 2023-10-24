@@ -1,7 +1,8 @@
 import * as THREE from "three";
 
 import { handleBrick } from "./bricks.js";
-
+let lastCollisionTimePlatform = 0;
+const collisionCooldownPlatform = 1000;
 // Função para verificar colisão da bola com a platforma
 export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
   // Atualize o 'bounding box' da plataforma com base na geometria atual e na escala do objeto.
@@ -14,7 +15,8 @@ export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
 
   // Ajuste o 'bounding box' com base na posição do objeto.
   boundingBox.translate(platform.position);
-
+  let currentSpeed = ballVelocity.length()
+  const previousVelocity = ballVelocity.clone();
   // Crie o 'bounding box' da bola.
   let bbBall = new THREE.Box3().setFromObject(ball);
 
@@ -24,43 +26,38 @@ export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
   // Verifique se o 'bounding box' da plataforma intersecta o 'bounding box' da bola.
   if (bbBall.intersectsBox(bbRebatedor)) {
     console.log("Colisão detectada");
+    const currentTime = performance.now(); // Obtenha o tempo atual em milissegundos.
+    
+    // Verifique se o tempo atual é maior que o 'lastCollisionTimePlatform' mais o período de 'collisionCooldownPlatform'.
+    if (currentTime < lastCollisionTimePlatform + collisionCooldownPlatform) {
+      // Se ainda estamos no período de cooldown, simplesmente retorne e ignore esta colisão.
+      return;
+    }
 
+    lastCollisionTimePlatform = currentTime;
     // Obtenha o ponto de colisão no espaço mundial.
     const collisionPointWorld = new THREE.Vector3().copy(ball.position);
 
-    // Calcule a posição relativa do ponto de colisão em relação ao bbRebatedor.
-    const relativeCollisionPoint = new THREE.Vector3().subVectors(
-      collisionPointWorld,
-      bbRebatedor.min
+    // Calcule o ponto médio da parte inferior do rebatedor.
+    const bottomMiddlePoint = new THREE.Vector3(
+      (bbRebatedor.min.x + bbRebatedor.max.x) / 2, 
+      bbRebatedor.min.y - 50, 
+      10
     );
+    
+    console.log("altura:" + (bbRebatedor.max.y - bbRebatedor.min.y));
+  
+    let directionVector = new THREE.Vector3().subVectors(collisionPointWorld, bottomMiddlePoint);
+    directionVector.normalize()
+    
 
-    // Calcule o tamanho do 'bounding box' do rebatedor.
-    const bbRebatedorSize = new THREE.Vector3();
-    bbRebatedor.getSize(bbRebatedorSize);
+    let previousVector = ballVelocity.clone();
+    previousVector.normalize();
 
-    // Normalizar o ponto de colisão relativo com base no tamanho do 'bounding box' do rebatedor.
-    const normalizedCollisionPoint = new THREE.Vector3(
-      relativeCollisionPoint.x / bbRebatedorSize.x,
-      relativeCollisionPoint.y / bbRebatedorSize.y,
-      relativeCollisionPoint.z / bbRebatedorSize.z
-    );
-
-    // Transforme o intervalo de [0, 1] para [-1, 1] se você estiver interessado apenas na posição X.
-    const collisionX = normalizedCollisionPoint.x * 2 - 1;
-
-    // Calcule o ângulo de saída com base na posição da colisão.
-    const maxAngle = Math.PI / 4; // Ângulo máximo de saída.
-    const angle = maxAngle * collisionX;
-
-    // Mantenha a magnitude (comprimento) da velocidade constante após a colisão.
-    const currentSpeed = ballVelocity.length();
-    const newVelocity = new THREE.Vector3(
-      Math.sin(angle) * currentSpeed,
-      Math.cos(angle) * Math.abs(currentSpeed),
-      0
-    );
-
-    ballVelocity.copy(newVelocity);
+    let newVector = previousVector.reflect(directionVector);
+    newVector.normalize();
+    newVector.multiplyScalar(currentSpeed);
+    ballVelocity.copy(newVector);
   }
 }
 
