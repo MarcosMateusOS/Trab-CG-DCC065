@@ -323,6 +323,7 @@ function duplicateBall() {
   );
   clonedBall.castShadow = true;
   scene.add(clonedBall);
+  clonedBall.visible = true;
 
   clonedBallVelocity = new THREE.Vector3();
   clonedBallVelocity.copy(ballVelocity);
@@ -339,8 +340,13 @@ function removeClonedBall() {
   if (clonedBall) {
     const object = scene.getObjectByProperty("uuid", clonedBall.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
 
-    scene.remove(object);
-    isActivePowerUp = true;
+    if (object) {
+      object.material.dispose();
+      object.geometry.dispose();
+      scene.remove(object);
+      isActivePowerUp = true;
+      clonedBall = null;
+    }
   }
 }
 
@@ -381,6 +387,7 @@ function checkScore() {
 }
 // animação bola
 let checkTime = 0;
+count.score = 9;
 function animate() {
   if (isPaused) return;
   updateInfos();
@@ -439,27 +446,23 @@ function animate() {
         checkBrickCollision(brick, clonedBall, clonedBallVelocity, count);
       }
     });
-    console.log(checkScore() && isActivePowerUp);
+
     if (checkScore() && isActivePowerUp) {
       showPowerUp();
     }
 
-    if (checkPowerUpCollsion(mesh2, powerUp) && !clonedBall) {
+    if (checkPowerUpCollsion(mesh2, powerUp)) {
       putPowerUp();
     }
 
     if (checkPowerUpIsInDestination(wallBottom, powerUp)) {
-      resetPowerUp();
+      console.log("checkPowerUpIsInDestination");
+      setTimeout(resetPowerUp(), 2000);
     }
 
     if (lerpConfig.move) {
       powerUp.position.lerp(lerpConfig.destination, lerpConfig.alpha);
     }
-
-    // if (count.score === 15) {
-    //   count.score = 0;
-    //   pause();
-    // }
   }
 }
 //fim animação  bola
@@ -576,8 +579,12 @@ function resume() {
 function resetGame() {
   start = false;
   count.score = 0;
+  checkTime = 0;
   // platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
+  newBallVelocity = 0.003 * height;
+  ballVelocity.normalize();
+  ballVelocity.multiplyScalar(newBallVelocity);
 
   ball.position.set(0, yOffset + mesh2height / 2, distanciaPlanoPrimarioZ);
   removeBricks();
@@ -635,8 +642,6 @@ function keyboardUpdate() {
   }
 
   if (keyboard.down("enter")) fullScreen();
-  // if (keyboard.down("Q")) start = true;
-  // if (keyboard.down("enter")) resume();
 }
 
 let initialTime;
