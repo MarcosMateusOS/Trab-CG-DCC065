@@ -423,10 +423,11 @@ function animate() {
       resetPowerUp();
     }
 
-    // if (count.score === 15) {
-    //   count.score = 0;
-    //   pause();
-    // }
+    if (count.score === 66) {
+      count.score = 0;
+      currentLevel = 2;
+      resetGame();
+    }
   }
 }
 //fim animação  bola
