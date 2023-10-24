@@ -105,7 +105,7 @@ export function checkBordersCollision(
 }
 // Variável para armazenar o tempo da última colisão
 let lastCollisionTime = 0;
-const collisionCooldown = 100; // Tempo de cooldown em milissegundos (ajuste conforme necessário)
+const collisionCooldown = 10; // Tempo de cooldown em milissegundos (ajuste conforme necessário)
 
 export function checkBrickCollision(brick, ball, ballVelocity, count) {
   // Obter o tempo atual

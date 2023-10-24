@@ -607,7 +607,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 let lightColor = "rgb(255,255,255)";
 let dirLight = new THREE.DirectionalLight(lightColor);
-var lightPos = new THREE.Vector3(100, 200, 210);
+var lightPos = new THREE.Vector3(100, 270, 210);
 setDirectionalLighting(lightPos);
 renderer.shadowMap.radius = 0;
 renderer.shadowIntensity = 0;
