@@ -139,7 +139,7 @@ mesh2.rotation.y = THREE.MathUtils.degToRad(90); // Aplicando rotação em Y
 mesh2.rotation.z = THREE.MathUtils.degToRad(270); // Aplicando rotação em Z
 
 // Posição final desejada para o mesh2
-mesh2.position.set(0, yOffset, 20);
+mesh2.position.set(0, yOffset, 10);
 
 // Ajuste a escala com base na geometria do plano primário
 mesh2.scale.set(
@@ -174,12 +174,12 @@ const ball = new THREE.Mesh(
 // let ballOffset = - yOffset - platform.geometry.parameters.height;
 // ball.position.set(0, -ballOffset, 30);
 scene.add(ball);
-let ballOffset = -yOffset - mesh2height / 2;
+let ballOffset = -yOffset - mesh2height / 2 + 0.025 * yOffset;
 ball.position.set(0, -ballOffset, distanciaPlanoPrimarioZ);
 let start = false;
 
 let initialBallVelocity = 0.0035 * height;
-const ballVelocity = new THREE.Vector3(0, -initialBallVelocity, 0);
+const ballVelocity = new THREE.Vector3(0, +initialBallVelocity, 0);
 let newBallVelocity = 0.003 * height;
 ballVelocity.normalize();
 ballVelocity.multiplyScalar(newBallVelocity);
@@ -456,8 +456,7 @@ function animate() {
     }
 
     if (checkPowerUpIsInDestination(wallBottom, powerUp)) {
-      console.log("checkPowerUpIsInDestination");
-      setTimeout(resetPowerUp(), 2000);
+      resetPowerUp();
     }
 
     if (count.score === 66) {
@@ -592,7 +591,11 @@ function resetGame() {
   ballVelocity.normalize();
   ballVelocity.multiplyScalar(newBallVelocity);
 
-  ball.position.set(0, yOffset + mesh2height / 2, distanciaPlanoPrimarioZ);
+  ball.position.set(
+    0,
+    yOffset + mesh2height / 2 - 0.025 * yOffset,
+    distanciaPlanoPrimarioZ
+  );
   removeBricks();
   removeClonedBall();
   bricks = [];
