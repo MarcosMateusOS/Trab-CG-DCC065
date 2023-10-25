@@ -77,17 +77,8 @@ scene.add(wallBottom);
 let wallRigth = walls.wallRigth;
 let wallLeft = walls.wallLeft;
 
-// Criação rebatedor
-// let platformWidth = 0.15 * primaryPlanGeometry.parameters.width;
-// let platformHeight = 0.025 * primaryPlanGeometry.parameters.height;
-// var platformGeometry = new THREE.PlaneGeometry(platformWidth, platformHeight);
-// let platformMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
-// let platform = new THREE.Mesh(platformGeometry, platformMaterial);
-// platform.castShadow = true;
 let yOffset = height * -0.35;
-// platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
 
-// scene.add(platform);
 //fim criação rebatedor
 
 //Criação novo rebatedor
@@ -104,26 +95,19 @@ let cylinderMesh = new THREE.Mesh(
   new THREE.MeshPhongMaterial({ color: "blue" })
 ); // Adicionado material para diferenciação
 
-// Posicione e atualize os objetos originais
-cubeMesh.position.set(0, 1, 0); // ou qualquer outra posição desejada
-cylinderMesh.position.set(1, -0.5, 0.0); // a posição é ajustada para corresponder à operação CSG
+cubeMesh.position.set(0, 1, 0);
+cylinderMesh.position.set(1, -0.5, 0.0);
 
 // Atualize as matrizes dos objetos
 updateObject(cubeMesh);
 updateObject(cylinderMesh);
 
-// Adicione os objetos originais à cena
-//    scene.add(cubeMesh);
-//    scene.add(cylinderMesh);
-
 // CSG holders
 let csgObject, cubeCSG, cylinderCSG;
 
-// Prepare os objetos para operações CSG
 cubeMesh.position.set(0, 1, 0);
 cylinderMesh.position.set(1, -0.5, 0.0);
 
-// Prepare os objetos para operações CSG
 cubeCSG = CSG.fromMesh(cubeMesh);
 cylinderCSG = CSG.fromMesh(cylinderMesh);
 
@@ -148,13 +132,12 @@ mesh2.scale.set(
   primaryPlanGeometry.parameters.width / 10
 );
 
-// Não é necessário chamar updateObject, pois matrixAutoUpdate é true por padrão
 mesh2.geometry.computeBoundingBox();
 let boundingBox = mesh2.geometry.boundingBox;
 let mesh2width = boundingBox.max.x - boundingBox.min.x;
 let mesh2height = boundingBox.max.y - boundingBox.min.y;
-mesh2width *= mesh2.scale.x; // Ajustando a largura com base na escala do objeto
-mesh2height *= mesh2.scale.y; // Ajustando a altura com base na escala do objeto
+mesh2width *= mesh2.scale.x;
+mesh2height *= mesh2.scale.y;
 
 scene.add(mesh2);
 
@@ -170,9 +153,7 @@ const ball = new THREE.Mesh(
   new THREE.SphereGeometry(newBallRadius),
   new THREE.MeshPhongMaterial({ color: 0xff0000 })
 );
-// let initialBallPosition = -0.3 * primaryPlan.geometry.parameters.height;
-// let ballOffset = - yOffset - platform.geometry.parameters.height;
-// ball.position.set(0, -ballOffset, 30);
+
 scene.add(ball);
 let ballOffset = -yOffset - mesh2height / 2 + 0.025 * yOffset;
 ball.position.set(0, -ballOffset, distanciaPlanoPrimarioZ);
@@ -203,10 +184,10 @@ function buildBricksPlan() {
 
 function removeBricks() {
   bricks.forEach((brick) => {
-    const object = scene.getObjectByProperty("uuid", brick.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
+    const object = scene.getObjectByProperty("uuid", brick.uuid);
     object.geometry.dispose();
     object.material.dispose();
-    scene.remove(object); // disposing and deleting mesh from scene
+    scene.remove(object);
   });
 }
 
@@ -340,7 +321,7 @@ function duplicateBall() {
 
 function removeClonedBall() {
   if (clonedBall) {
-    const object = scene.getObjectByProperty("uuid", clonedBall.uuid); // getting object by property uuid and x is uuid of an object that we want to delete and clicked on before
+    const object = scene.getObjectByProperty("uuid", clonedBall.uuid);
 
     if (object) {
       object.material.dispose();
@@ -402,7 +383,7 @@ function animate() {
     if (checkTime <= 15) {
       newBallVelocity = initialBallVelocity;
       newBallVelocity = newBallVelocity + (checkTime / 15) * newBallVelocity;
-      // console.log("new ball velocity", newBallVelocity);
+
       ballVelocity.normalize();
       ballVelocity.multiplyScalar(newBallVelocity);
     }
@@ -490,7 +471,7 @@ function onMouseMove(event) {
     let intersects = raycaster.intersectObjects([primaryPlan, secundaryPlan]);
 
     if (intersects.length > 0) {
-      let point = intersects[0].point; // Pick the point where intersects occurrs
+      let point = intersects[0].point;
 
       // Calcula os limites do planoPrimario
       let borderLeftSize = wallLeft.geometry.parameters.width;
@@ -500,18 +481,15 @@ function onMouseMove(event) {
         wallLeft.position.x +
         mesh2width * 2 +
         borderLeftSize / 2 +
-        borderLeftSize / 5; // Ajustado aqui
+        borderLeftSize / 5;
       let rightLimit =
         wallRigth.position.x -
         mesh2width * 2 -
         borderRightSize / 2 -
-        borderLeftSize / 5; // Ajustado aqui
+        borderLeftSize / 5;
 
       // Verifica se a posição x da interseção está dentro dos limites
-      if (
-        point.x >= leftLimit && // Ajustado aqui
-        point.x <= rightLimit // Ajustado aqui
-      ) {
+      if (point.x >= leftLimit && point.x <= rightLimit) {
         // Move o retângulo para a posição x da interseção
         mesh2.position.x = point.x;
         // updateObject(mesh2);
@@ -520,20 +498,18 @@ function onMouseMove(event) {
           ball.position.x = point.x;
         }
       } else if (point.x < leftLimit) {
-        // Ajustado aqui
         // Coloca o retângulo no limite à esquerda
         mesh2.position.x = leftLimit;
-        // updateObject(mesh2); // Ajustado aqui
+        // updateObject(mesh2);
         if (!start) {
           ball.position.x = leftLimit;
         }
       } else if (point.x > rightLimit) {
-        // Ajustado aqui
         // Coloca o retângulo no limite à direita
         mesh2.position.x = rightLimit;
-        // updateObject(mesh2); // Ajustado aqui
+        // updateObject(mesh2);
         if (!start) {
-          ball.position.x = rightLimit; // Ajustado aqui
+          ball.position.x = rightLimit;
         }
       }
     }
@@ -557,12 +533,8 @@ function updateDimensions() {
   aspect = width / height;
   //fim atualizar height e proporção
 
-  // Atualizar câmera
-  // camera.left = width / -2;
-  // camera.right = width / 2;
   camera.aspect = aspect;
-  // camera.bottom = height / -2;
-  // camera.position.set(0,0,height/2)
+
   camera.updateProjectionMatrix();
   //fim atualizar câmera
   renderer.setSize(width, height);
@@ -580,7 +552,6 @@ function pause() {
 
 function resume() {
   isPaused = false;
-  console.log(isPaused);
   animate();
 }
 
@@ -588,7 +559,7 @@ function resetGame() {
   start = false;
   count.score = 0;
   checkTime = 0;
-  // platform.position.set(0, yOffset, distanciaPlanoPrimarioZ);
+
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
   newBallVelocity = 0.003 * height;
   ballVelocity.normalize();
@@ -663,8 +634,6 @@ document.addEventListener("click", function () {
   initialTime = Date.now() / 1000;
 });
 
-//updateDimensions();
-
 // Adicionando luz
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -697,22 +666,6 @@ function setDirectionalLighting(position) {
   dirLight.shadow.radius = 3;
   scene.add(dirLight);
 }
-
-console.log(window.innerHeight);
-console.log(window.innerWidth);
-
-// let objColor = "rgb(255,20,20)"; // Define the color of the object
-// let objShininess = 200;          // Define the shininess of the object
-
-// let geometryT = new SphereGeometry(50);
-// let material = new THREE.MeshPhongMaterial({color: objColor, shininess: objShininess});
-
-// let t = new THREE.Mesh(geometryT,material);
-// t.castShadow = true;
-// t.position.set(30,0,40);
-
-// scene.add(t);
-// primaryPlan.rotation.y = -0.1;
 
 render();
 function render() {

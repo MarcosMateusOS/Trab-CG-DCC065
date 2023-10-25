@@ -25,7 +25,6 @@ export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
 
   // Verifique se o 'bounding box' da plataforma intersecta o 'bounding box' da bola.
   if (bbBall.intersectsBox(bbRebatedor)) {
-    console.log("Colisão detectada");
     const currentTime = performance.now(); // Obtenha o tempo atual em milissegundos.
 
     // Verifique se o tempo atual é maior que o 'lastCollisionTimePlatform' mais o período de 'collisionCooldownPlatform'.
@@ -41,7 +40,7 @@ export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
     // Calcule o ponto médio da parte inferior do rebatedor.
     const bottomMiddlePoint = new THREE.Vector3(
       (bbRebatedor.min.x + bbRebatedor.max.x) / 2,
-      bbRebatedor.min.y - 50,
+      bbRebatedor.min.y - 100,
       10
     );
 
@@ -122,15 +121,12 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
   );
 
   if (brickBox.intersectsSphere(ballSphere)) {
-    // Atualizar o tempo da última colisão
     lastCollisionTime = currentTime;
 
-    console.log("brick colidiu: ", brick.material.color.getHexString());
     const ballPos = ballSphere.center;
     let brickMax = brickBox.max;
     let brickMin = brickBox.min;
 
-    // Verificar colisão na parte superior do tijolo
     if (ballPos.y > brickMax.y) {
       ballVelocity.y = -ballVelocity.y;
     }
