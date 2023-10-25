@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 import { handleBrick } from "./bricks.js";
 let lastCollisionTimePlatform = 0;
-const collisionCooldownPlatform = 1000;
+const collisionCooldownPlatform = 100;
 // Função para verificar colisão da bola com a platforma
 export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
   // Atualize o 'bounding box' da plataforma com base na geometria atual e na escala do objeto.

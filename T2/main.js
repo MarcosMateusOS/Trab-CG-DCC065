@@ -281,8 +281,9 @@ const materialPowerUp = new THREE.MeshLambertMaterial({ map: texture });
 const powerUp = new THREE.Mesh(geometryPowerUp, materialPowerUp);
 const randX = Math.floor(
   Math.random() *
-    (Math.floor(wallRigth.position.x) - Math.floor(wallLeft.position.x)) +
-    Math.floor(wallLeft.position.x)
+    (Math.floor(wallRigth.position.x - 10) -
+      Math.floor(wallLeft.position.x + 10)) +
+    Math.floor(wallLeft.position.x + 10)
 );
 
 powerUp.position.set(randX, yOffset + 400, distanciaPlanoPrimarioZ);
@@ -305,8 +306,9 @@ function resetPowerUp() {
   powerUp.visible = false;
   const randX = Math.floor(
     Math.random() *
-      (Math.floor(wallRigth.position.x) - Math.floor(wallLeft.position.x)) +
-      Math.floor(wallLeft.position.x)
+      (Math.floor(wallRigth.position.x - 10) -
+        Math.floor(wallLeft.position.x + 10)) +
+      Math.floor(wallLeft.position.x + 10)
   );
 
   powerUp.position.set(randX, yOffset + 400, distanciaPlanoPrimarioZ);
@@ -330,7 +332,7 @@ function duplicateBall() {
   clonedBallVelocity.normalize();
   clonedBallVelocity.multiplyScalar(newBallVelocity);
 
-  clonedBall.position.z = distanciaPlanoPrimarioZ;
+  clonedBall.position.z = ball.position.z;
   clonedBall.position.x += clonedBallVelocity.x;
   clonedBall.position.y += clonedBallVelocity.y;
   isActivePowerUp = false;
@@ -362,8 +364,9 @@ function putPowerUp() {
   powerUp.visible = false;
   const randX = Math.floor(
     Math.random() *
-      (Math.floor(wallRigth.position.x) - Math.floor(wallLeft.position.x)) +
-      Math.floor(wallLeft.position.x)
+      (Math.floor(wallRigth.position.x - 10) -
+        Math.floor(wallLeft.position.x + 10)) +
+      Math.floor(wallLeft.position.x + 10)
   );
 
   powerUp.position.set(randX, yOffset + 400, distanciaPlanoPrimarioZ);
@@ -459,7 +462,7 @@ function animate() {
       resetPowerUp();
     }
 
-    if (count.score === 66) {
+    if (count.score === 66 && currentLevel === 1) {
       count.score = 0;
       currentLevel = 2;
       resetGame();
@@ -605,8 +608,9 @@ function resetGame() {
   isActivePowerUp = true;
   const randX = Math.floor(
     Math.random() *
-      (Math.floor(wallRigth.position.x) - Math.floor(wallLeft.position.x)) +
-      Math.floor(wallLeft.position.x)
+      (Math.floor(wallRigth.position.x - 10) -
+        Math.floor(wallLeft.position.x + 10)) +
+      Math.floor(wallLeft.position.x + 10)
   );
   powerUp.position.set(randX, yOffset + 400, distanciaPlanoPrimarioZ);
   powerUp.visible = false;
