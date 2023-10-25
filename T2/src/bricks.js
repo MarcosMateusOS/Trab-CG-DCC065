@@ -19,20 +19,15 @@ export default function addBrick(size, position, color) {
 }
 
 export function handleBrick(brick, count) {
-  console.log("handleBrick ativado. ", brick.hitCount);
-
   if (brick.hitCount > 0) {
-    console.log("esse aq hita mttt: ", brick.hitCount);
     brick.material.color = new THREE.Color("#888888");
     brick.hitCount--;
   } else {
-    console.log("esse aq hita nddd: ", brick.hitCount);
-    // Mover o tijolo para fora da cena e torná-lo invisível
+    // Move o tijolo para fora da cena e o torna invisível
     brick.position.set(1000, 1000, 1000);
     brick.visible = false;
 
     count.score++;
-    console.log("iscore: ", count);
   }
 }
 
@@ -68,7 +63,7 @@ export function buildBricks(plan, currentLevel) {
     "#BCBBBC", // cinza     - 1
     "#C71E0F", // vermelho  - 2
     "#006FEA", // azul      - 3
-    "#Fb9737", // laranja   - 4
+    "#FB9737", // laranja   - 4
     "#FC74B4", // rosa      - 5
     "#80D010", // verde     - 6
   ];
@@ -79,21 +74,17 @@ export function buildBricks(plan, currentLevel) {
   let size = 0.038 * planeHeight;
   let startPositionX = -planeWidth / 2 + 0.11 * planeWidth;
   let startPositionY = planeHeight * 0.4;
-  console.log("começo tijolo:" + startPositionY);
-  // let spacing = 0.3 * size; // Defina o espaço entre os tijolos aqui
 
   if (currentLevel === 1) {
     level1.forEach((row, indexRow) => {
       row.forEach((brick, indexBrick) => {
         if (brick === 1) {
           let position = {
-            x: 10 + startPositionX + indexBrick * size, // Adicione o espaço aqui
+            x: 10 + startPositionX + indexBrick * size,
             y: startPositionY + indexRow * -(0.5 * size),
-            z: 10, // Adicione o espaço aqui
+            z: 10,
           };
-          console.log(
-            "começo tijolo:" + startPositionY + indexRow * -(0.5 * (size + 2))
-          );
+
           let color = colors[indexRow];
 
           bricks.push(addBrick(size, position, color));
@@ -105,8 +96,8 @@ export function buildBricks(plan, currentLevel) {
       row.forEach((brick, indexBrick) => {
         if (brick !== 0) {
           let position = {
-            x: 42 + startPositionX + indexBrick * (size),
-            y: startPositionY + indexRow * -(0.5 * (size)),
+            x: 42 + startPositionX + indexBrick * size,
+            y: startPositionY + indexRow * -(0.5 * size),
             z: 10,
           };
 

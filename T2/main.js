@@ -52,7 +52,6 @@ const { primary, second } = buildWordPlans(scene, width, height);
 var primaryPlanGeometry = new THREE.BoxGeometry(height / 2, height, 5);
 let primaryPlanMaterial = new THREE.MeshLambertMaterial({ color: "#24188c" });
 let primaryPlan = new THREE.Mesh(primaryPlanGeometry, primaryPlanMaterial);
-// primaryPlan.layers.set(0);
 scene.add(primaryPlan);
 //fim criação plano primário
 
@@ -85,24 +84,23 @@ let yOffset = height * -0.35;
 let mesh2;
 let auxMat = new THREE.Matrix4();
 
-// Base objects
+// Objetos
 let cubeMesh = new THREE.Mesh(
   new THREE.BoxGeometry(2, 2, 2),
   new THREE.MeshPhongMaterial({ color: "red" })
-); // Adicionado material para diferenciação
+); 
 let cylinderMesh = new THREE.Mesh(
   new THREE.CylinderGeometry(0.85, 0.85, 2, 17),
   new THREE.MeshPhongMaterial({ color: "blue" })
-); // Adicionado material para diferenciação
+);
 
 cubeMesh.position.set(0, 1, 0);
 cylinderMesh.position.set(1, -0.5, 0.0);
 
-// Atualize as matrizes dos objetos
+// Atualiza as matrizes dos objetos
 updateObject(cubeMesh);
 updateObject(cylinderMesh);
 
-// CSG holders
 let csgObject, cubeCSG, cylinderCSG;
 
 cubeMesh.position.set(0, 1, 0);
@@ -111,12 +109,11 @@ cylinderMesh.position.set(1, -0.5, 0.0);
 cubeCSG = CSG.fromMesh(cubeMesh);
 cylinderCSG = CSG.fromMesh(cylinderMesh);
 
-// Object 2 - Cube INTERSECT Cylinder
-csgObject = cubeCSG.intersect(cylinderCSG); // Execute intersection
+csgObject = cubeCSG.intersect(cylinderCSG);
 mesh2 = CSG.toMesh(csgObject, auxMat);
 mesh2.material = new THREE.MeshLambertMaterial({ color: "green" });
 
-// Aplique transformações ao mesh2
+// Aplica transformações ao mesh2 (plataforma)
 mesh2.position.set(3, 0, 10); // Posição inicial
 mesh2.scale.set(0.5, 0.5, 0.5); // Aplicando escala
 mesh2.rotation.y = THREE.MathUtils.degToRad(90); // Aplicando rotação em Y
@@ -125,7 +122,7 @@ mesh2.rotation.z = THREE.MathUtils.degToRad(270); // Aplicando rotação em Z
 // Posição final desejada para o mesh2
 mesh2.position.set(0, yOffset, 10);
 
-// Ajuste a escala com base na geometria do plano primário
+// Ajusta a escala com base na geometria do plano primário
 mesh2.scale.set(
   primaryPlanGeometry.parameters.width / 20,
   primaryPlanGeometry.parameters.width / 20,
@@ -454,7 +451,7 @@ function animate() {
     }
   }
 }
-//fim animação  bola
+//fim animação bola
 
 // Criação Raycaster
 let raycaster = new THREE.Raycaster();
@@ -492,7 +489,6 @@ function onMouseMove(event) {
       if (point.x >= leftLimit && point.x <= rightLimit) {
         // Move o retângulo para a posição x da interseção
         mesh2.position.x = point.x;
-        // updateObject(mesh2);
 
         if (!start) {
           ball.position.x = point.x;
@@ -500,14 +496,13 @@ function onMouseMove(event) {
       } else if (point.x < leftLimit) {
         // Coloca o retângulo no limite à esquerda
         mesh2.position.x = leftLimit;
-        // updateObject(mesh2);
         if (!start) {
           ball.position.x = leftLimit;
         }
       } else if (point.x > rightLimit) {
         // Coloca o retângulo no limite à direita
         mesh2.position.x = rightLimit;
-        // updateObject(mesh2);
+
         if (!start) {
           ball.position.x = rightLimit;
         }
@@ -531,7 +526,7 @@ function updateDimensions() {
   width = window.innerWidth;
   height = window.innerHeight;
   aspect = width / height;
-  //fim atualizar height e proporção
+  // fim atualizar height e proporção
 
   camera.aspect = aspect;
 
@@ -652,7 +647,6 @@ ball.castShadow = true;
 function setDirectionalLighting(position) {
   dirLight.position.copy(position);
 
-  // Shadow settings
   dirLight.castShadow = true;
   dirLight.shadow.mapSize.width = 2048;
   dirLight.shadow.mapSize.height = 2048;
@@ -672,5 +666,5 @@ function render() {
   keyboardUpdate();
   animate();
   requestAnimationFrame(render);
-  renderer.render(scene, camera); // Render scene
+  renderer.render(scene, camera);
 }

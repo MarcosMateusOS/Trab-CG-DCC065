@@ -5,27 +5,21 @@ let lastCollisionTimePlatform = 0;
 const collisionCooldownPlatform = 100;
 // Função para verificar colisão da bola com a platforma
 export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
-  // Atualize o 'bounding box' da plataforma com base na geometria atual e na escala do objeto.
   platform.geometry.computeBoundingBox();
-  let boundingBox = platform.geometry.boundingBox.clone(); // Clone o bounding box para evitar alterações no original.
-
-  // Ajuste o 'bounding box' com base na escala do objeto.
+  let boundingBox = platform.geometry.boundingBox.clone(); 
   boundingBox.max.multiply(platform.scale);
   boundingBox.min.multiply(platform.scale);
 
-  // Ajuste o 'bounding box' com base na posição do objeto.
   boundingBox.translate(platform.position);
   let currentSpeed = ballVelocity.length();
   const previousVelocity = ballVelocity.clone();
-  // Crie o 'bounding box' da bola.
+  
   let bbBall = new THREE.Box3().setFromObject(ball);
 
-  // Crie o 'bounding box' do rebatedor (platform).
   let bbRebatedor = new THREE.Box3().setFromObject(platform);
 
-  // Verifique se o 'bounding box' da plataforma intersecta o 'bounding box' da bola.
   if (bbBall.intersectsBox(bbRebatedor)) {
-    const currentTime = performance.now(); // Obtenha o tempo atual em milissegundos.
+    const currentTime = performance.now();
 
     // Verifique se o tempo atual é maior que o 'lastCollisionTimePlatform' mais o período de 'collisionCooldownPlatform'.
     if (currentTime < lastCollisionTimePlatform + collisionCooldownPlatform) {
@@ -34,17 +28,14 @@ export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
     }
 
     lastCollisionTimePlatform = currentTime;
-    // Obtenha o ponto de colisão no espaço mundial.
+    
     const collisionPointWorld = new THREE.Vector3().copy(ball.position);
 
-    // Calcule o ponto médio da parte inferior do rebatedor.
     const bottomMiddlePoint = new THREE.Vector3(
       (bbRebatedor.min.x + bbRebatedor.max.x) / 2,
       bbRebatedor.min.y - 100,
       10
     );
-
-    console.log("altura:" + (bbRebatedor.max.y - bbRebatedor.min.y));
 
     let directionVector = new THREE.Vector3().subVectors(
       collisionPointWorld,
@@ -78,20 +69,14 @@ export function checkBordersCollision(
 
   // Verifique se a bola colide com a parede esquerda
   if (wallLeftBox.intersectsBox(ballBox)) {
-    // O vetor normal à parede esquerda é no sentido positivo do eixo X
-    // Portanto, inverta a componente x da velocidade da bola
     ballVelocity.x = -ballVelocity.x;
   }
 
   if (wallRightBox.intersectsBox(ballBox)) {
-    // O vetor normal à parede esquerda é no sentido positivo do eixo X
-    // Portanto, inverta a componente x da velocidade da bola
     ballVelocity.x = -ballVelocity.x;
   }
 
   if (wallTopBox.intersectsBox(ballBox)) {
-    // O vetor normal à parede esquerda é no sentido positivo do eixo X
-    // Portanto, inverta a componente x da velocidade da bola
     ballVelocity.y = -ballVelocity.y;
   }
 
@@ -103,13 +88,12 @@ export function checkBordersCollision(
 }
 // Variável para armazenar o tempo da última colisão
 let lastCollisionTime = 0;
-const collisionCooldown = 10; // Tempo de cooldown em milissegundos (ajuste conforme necessário)
+const collisionCooldown = 10; // Tempo de cooldown em milissegundos
 
 export function checkBrickCollision(brick, ball, ballVelocity, count) {
-  // Obter o tempo atual
   const currentTime = new Date().getTime();
 
-  // Se não passou tempo suficiente desde a última colisão, simplesmente retorne
+  // Se não passou tempo suficiente desde a última colisão, retorna
   if (currentTime - lastCollisionTime < collisionCooldown) {
     return;
   }
@@ -148,7 +132,6 @@ export function checkBrickCollision(brick, ball, ballVelocity, count) {
 }
 
 function createBBHelper(bb, color, scene) {
-  // Create a bounding box helper
   let helper = new THREE.Box3Helper(bb, color);
   scene.add(helper);
   return helper;

@@ -70,7 +70,7 @@ function buildObjects() {
   cubeCSG = CSG.fromMesh(cubeMesh);
   cylinderCSG = CSG.fromMesh(cylinderMesh);
 
-  csgObject = cubeCSG.intersect(cylinderCSG); // Execute intersection
+  csgObject = cubeCSG.intersect(cylinderCSG);
   mesh2 = CSG.toMesh(csgObject, auxMat);
   mesh2.material = new THREE.MeshLambertMaterial({ color: "green" });
 
@@ -100,10 +100,10 @@ function updateObject(mesh) {
 }
 
 function render() {
-  stats.update(); // Update FPS
+  stats.update();
   trackballControls.update();
-  requestAnimationFrame(render); // Show events
-  renderer.render(scene, camera); // Render scene
+  requestAnimationFrame(render);
+  renderer.render(scene, camera);
 }
 
 function buildInterface() {
@@ -117,7 +117,6 @@ function buildInterface() {
     };
   })();
 
-  // GUI interface
   var gui = new GUI();
   gui
     .add(controls, "wire", false)
@@ -179,11 +178,7 @@ function addNormalArrowsWithinXRange(mesh) {
         arrowColor
       );
       mesh.add(arrowHelper);
-      // mesh.rotateY(THREE.MathUtils.degToRad(90));
       mesh.updateMatrix(); // Adicionando a seta como um child do mesh garante que ela se mova com o mesh
     }
   }
 }
-
-// Uso:
-// addNormalArrowsWithinXRange(mesh2);
