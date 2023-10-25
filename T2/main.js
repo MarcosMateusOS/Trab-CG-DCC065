@@ -446,6 +446,12 @@ function animate() {
       resetGame();
     }
 
+    if (count.score === 224 && currentLevel === 2) {
+      count.score = 0;
+      currentLevel = 1;
+      resetGame();
+    }
+
     if (lerpConfig.move) {
       powerUp.position.lerp(lerpConfig.destination, lerpConfig.alpha);
     }
