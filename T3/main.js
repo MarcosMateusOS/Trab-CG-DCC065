@@ -33,7 +33,8 @@ import {
 var count = { score: 0 };
 var currentLevel = 1;
 
-let scene, renderer, camera;
+let scene, renderer, camera, orbit;
+
 scene = new THREE.Scene();
 
 const buildSkyBox = async () => {
@@ -64,7 +65,7 @@ let aspect = width / height;
 
 let position = new THREE.Vector3(5, -81, height / 2);
 camera = cameraInit(height, width, position);
-
+orbit = new OrbitControls(camera, renderer.domElement);
 const { primary, second } = await buildWordPlans(scene, width, height);
 
 //Criação plano primário
@@ -617,6 +618,8 @@ function resetGame() {
 
 var keyboard = new KeyboardState();
 let isFullScreen = false;
+let enableOrbit = false;
+orbit.enabled = false;
 function fullScreen() {
   let element = document.documentElement;
   if (!isFullScreen) {
@@ -646,6 +649,16 @@ function keyboardUpdate() {
       pause();
     } else {
       resume();
+    }
+  }
+
+  if (keyboard.down("O")) {
+    if (!enableOrbit) {
+      orbit.enabled = true;
+      enableOrbit = true;
+    } else {
+      orbit.enabled = false;
+      enableOrbit = false;
     }
   }
 
