@@ -18,5 +18,8 @@ export default function cameraInit(tamanho, largura, position) {
   // Posicionando a câmera
   camera.position.copy(position);
 
+  var inclinacao = Math.PI / 180;
+  camera.rotateOnWorldAxis(new THREE.Vector3(5, 0, 0), inclinacao);
+
   return camera;
 }

@@ -26,6 +26,7 @@ import {
   PCFShadowMap,
   SphereGeometry,
   TextureLoader,
+  CubeTextureLoader,
   Vector3,
 } from "../build/three.module.js";
 
@@ -34,7 +35,25 @@ var currentLevel = 1;
 
 let scene, renderer, camera;
 scene = new THREE.Scene();
-scene.background = new THREE.Color("black"); //0xf0f0f0);
+
+const buildSkyBox = async () => {
+  const pathArr = [
+    "./utils/skybox/rt.png",
+    "./utils/skybox/lf.png",
+    "./utils/skybox/up.png",
+    "./utils/skybox/dn.png",
+    "./utils/skybox/ft.png",
+    "./utils/skybox/bk.png",
+  ];
+  const loader = new CubeTextureLoader();
+  let texture = await loader.loadAsync(pathArr);
+
+  return texture;
+};
+
+scene.background = await buildSkyBox();
+
+//scene.background = new THREE.Color("red"); //0xf0f0f0);
 renderer = initRenderer();
 
 let distanciaPlanoPrimarioZ = 10;
@@ -43,14 +62,18 @@ let height = window.innerHeight;
 let width = window.innerWidth;
 let aspect = width / height;
 
-let position = new THREE.Vector3(5, 5, height / 2);
+let position = new THREE.Vector3(5, -81, height / 2);
 camera = cameraInit(height, width, position);
 
-const { primary, second } = buildWordPlans(scene, width, height);
+const { primary, second } = await buildWordPlans(scene, width, height);
 
 //Criação plano primário
 var primaryPlanGeometry = new THREE.BoxGeometry(height / 2, height, 5);
-let primaryPlanMaterial = new THREE.MeshLambertMaterial({ color: "#24188c" });
+let primaryPlanMaterial = new THREE.MeshLambertMaterial({
+  color: new THREE.Color(0, 0, 0),
+  opacity: 0,
+  transparent: true,
+});
 let primaryPlan = new THREE.Mesh(primaryPlanGeometry, primaryPlanMaterial);
 scene.add(primaryPlan);
 //fim criação plano primário
@@ -59,7 +82,7 @@ let secundaryPlanGeometry = second.secundaryPlanGeometry;
 let secundaryPlan = second.secundaryPlan;
 
 //Criação de paredes
-const { walls, geometry } = buildWorldWalls(
+const { walls, geometry } = await buildWorldWalls(
   scene,
   height,
   distanciaPlanoPrimarioZ
@@ -88,7 +111,7 @@ let auxMat = new THREE.Matrix4();
 let cubeMesh = new THREE.Mesh(
   new THREE.BoxGeometry(2, 2, 2),
   new THREE.MeshPhongMaterial({ color: "red" })
-); 
+);
 let cylinderMesh = new THREE.Mesh(
   new THREE.CylinderGeometry(0.85, 0.85, 2, 17),
   new THREE.MeshPhongMaterial({ color: "blue" })
