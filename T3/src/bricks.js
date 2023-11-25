@@ -1,16 +1,28 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
-export default function addBrick(size, position, color) {
+
+const textureLoader = new THREE.TextureLoader();
+
+export default function addBrick(size, position, color, isTextured = false) {
   const width = size;
   const height = 0.5 * size;
 
   const geometry = new THREE.BoxGeometry(1, 1, height * 1);
-  const material = new THREE.MeshPhongMaterial({ color: color });
+  let material;
+
+  if (isTextured) {
+    const texture = textureLoader.load('./utils/tijolo.jpg');
+    material = new THREE.MeshPhongMaterial({ map: texture });
+  } else {
+    material = new THREE.MeshPhongMaterial({ color: color });
+  }
+
   const brick = new THREE.Mesh(geometry, material);
 
   brick.position.set(position.x, position.y, position.z);
   brick.scale.set(width, height, 1);
   brick.castShadow = true;
+  brick.isTextured = isTextured; 
 
   if (color === "#BCBBBC") brick.hitCount = 1;
   else brick.hitCount = 0;
@@ -21,10 +33,15 @@ export default function addBrick(size, position, color) {
 export function handleBrick(brick, count) {
   if (brick.hitCount > 0) {
     new Audio('../assets/sounds/bloco2.mp3').play();
-    brick.material.color = new THREE.Color("#888888");
+    if (brick.isTextured) {
+      
+      brick.material = new THREE.MeshPhongMaterial({ color: '#664a49' });
+    } else {
+      brick.material.color = new THREE.Color("#888888");
+    }
     brick.hitCount--;
   } else {
-    // Move o tijolo para fora da cena e o torna invisível
+
     new Audio('../assets/sounds/bloco1.mp3').play();
     brick.position.set(1000, 1000, 1000);
     brick.visible = false;
@@ -61,7 +78,6 @@ export function buildBricks(plan, currentLevel) {
   ];
 
   const colors = [
-    //         // vazio     - 0
     "#BCBBBC", // cinza     - 1
     "#C71E0F", // vermelho  - 2
     "#006FEA", // azul      - 3
@@ -88,8 +104,9 @@ export function buildBricks(plan, currentLevel) {
           };
 
           let color = colors[indexRow];
+          let isTextured = color === "#BCBBBC"; 
 
-          bricks.push(addBrick(size, position, color));
+          bricks.push(addBrick(size, position, color, isTextured));
         }
       });
     });
@@ -104,8 +121,9 @@ export function buildBricks(plan, currentLevel) {
           };
 
           let color = colors[brick - 1];
+          let isTextured = color === "#BCBBBC"; 
 
-          bricks.push(addBrick(size, position, color));
+          bricks.push(addBrick(size, position, color, isTextured));
         }
       });
     });
