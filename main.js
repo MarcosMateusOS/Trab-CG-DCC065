@@ -1,12 +1,12 @@
 import * as THREE from "three";
-import { TextGeometry } from "../build/jsm/geometries/TextGeometry.js";
-import { FontLoader } from "../build/jsm/loaders/FontLoader.js";
-import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
-import GUI from "../libs/util/dat.gui.module.js";
+import { TextGeometry } from "./build/jsm/geometries/TextGeometry.js";
+import { FontLoader } from "./build/jsm/loaders/FontLoader.js";
+import { OrbitControls } from "./build/jsm/controls/OrbitControls.js";
+import { GLTFLoader } from "./build/jsm/loaders/GLTFLoader.js";
+import GUI from "./libs/util/dat.gui.module.js";
 import cameraInit from "./src/camera.js";
 
-import { CSG } from "../libs/other/CSGMesh.js";
+import { CSG } from "./libs/other/CSGMesh.js";
 
 import addPlatform from "./src/platform.js";
 import {
@@ -17,8 +17,8 @@ import {
   checkPowerUpIsInDestination,
 } from "./src/collisions.js";
 
-import KeyboardState from "../libs/util/KeyboardState.js";
-import { initRenderer } from "../libs/util/util.js";
+import KeyboardState from "./libs/util/KeyboardState.js";
+import { initRenderer } from "./libs/util/util.js";
 
 import { buildWordPlans, buildWorldWalls } from "./src/buildWorld.js";
 import { buildBricks } from "./src/bricks.js";
@@ -706,53 +706,40 @@ function setDirectionalLighting(position) {
 
 function positionSpaceshipOnPaddle() {
   if (spaceship && mesh2) {
-      
-      spaceship.position.x = mesh2.position.x;
-      spaceship.position.y = mesh2.position.y - 90;
-      spaceship.position.z = mesh2.position.z;
+    spaceship.position.x = mesh2.position.x;
+    spaceship.position.y = mesh2.position.y - 90;
+    spaceship.position.z = mesh2.position.z;
   }
 }
-
 
 let spaceship;
 
 const loadSpaceship = async () => {
   const loader = new GLTFLoader();
-  const gltf = await loader.loadAsync('./utils/nave.glb');
+  const gltf = await loader.loadAsync("./utils/nave.glb");
   spaceship = gltf.scene;
 
-  
-  const grayColor = new THREE.Color(0x808080); 
+  const grayColor = new THREE.Color(0x808080);
 
-  
   spaceship.traverse((child) => {
-      if (child.isMesh) {
-        child.material = new THREE.MeshPhongMaterial({
-          color: grayColor,
-          shininess: 100 
-        });
-      }
+    if (child.isMesh) {
+      child.material = new THREE.MeshPhongMaterial({
+        color: grayColor,
+        shininess: 100,
+      });
+    }
   });
 
-  
+  spaceship.scale.set(7, 7, 7);
 
-  
-  spaceship.scale.set(7, 7, 7); 
-
-  
   positionSpaceshipOnPaddle();
   spaceship.rotation.y = 270 * (Math.PI / 180);
   spaceship.rotation.z = 270 * (Math.PI / 180);
-  
- 
+
   scene.add(spaceship);
 };
 
 loadSpaceship();
-
-
-
-
 
 render();
 function render() {
