@@ -1,16 +1,16 @@
 import * as THREE from "three";
-import Stats from "../build/jsm/libs/stats.module.js";
-import GUI from "../libs/util/dat.gui.module.js";
-import { TrackballControls } from "../build/jsm/controls/TrackballControls.js";
+import Stats from "./build/jsm/libs/stats.module.js";
+import GUI from "./libs/util/dat.gui.module.js";
+import { TrackballControls } from "./build/jsm/controls/TrackballControls.js";
 import {
   initRenderer,
   initCamera,
   initDefaultBasicLight,
   createGroundPlane,
   onWindowResize,
-} from "../libs/util/util.js";
+} from "./libs/util/util.js";
 
-import { CSG } from "../libs/other/CSGMesh.js";
+import { CSG } from "./libs/other/CSGMesh.js";
 
 var scene = new THREE.Scene();
 var stats = new Stats();
