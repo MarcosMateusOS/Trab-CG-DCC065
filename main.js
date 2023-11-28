@@ -58,7 +58,7 @@ scene.background = await buildSkyBox();
 
 //scene.background = new THREE.Color("red"); //0xf0f0f0);
 renderer = initRenderer();
-
+renderer.setPixelRatio(window.devicePixelRatio);
 let distanciaPlanoPrimarioZ = 10;
 
 let height = window.innerHeight;
