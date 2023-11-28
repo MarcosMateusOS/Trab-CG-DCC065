@@ -553,6 +553,24 @@ window.addEventListener(
   false
 );
 
+function handleOrientation(event) {
+  var orientation = window.orientation; // inclinação lateral em graus
+
+  console.log(orientation);
+  if (orientation === 90 || orientation === -90) {
+    // Paisagem
+    console.log("paisagem");
+    camera.aspect = width / height;
+    camera.position.z = width / 1;
+    setDirectionalLightingP(lightPos);
+  } else {
+    camera.aspect = window.innerHeight / window.innerWidth;
+    setDirectionalLighting(lightPos);
+  }
+}
+
+window.addEventListener("orientationchange", handleOrientation, true);
+
 function updateDimensions() {
   // Atualizar height e proporção da janela
   width = window.innerWidth;
@@ -646,7 +664,6 @@ function resetButton() {
 
 let pressedShot = false;
 function onButtonDown(event) {
-  console.log(event.target.id);
   switch (event.target.id) {
     case "shot":
       start = true;
@@ -695,6 +712,23 @@ function setDirectionalLighting(position) {
   dirLight.shadow.camera.top = window.innerHeight;
   dirLight.shadow.camera.bottom = -window.innerHeight;
   dirLight.name = "Direction Light";
+  dirLight.shadow.radius = 3;
+  scene.add(dirLight);
+}
+
+function setDirectionalLightingP(position) {
+  dirLight.position.copy(position);
+
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  dirLight.shadow.camera.near = 10;
+  dirLight.shadow.camera.far = 1000;
+  dirLight.shadow.camera.left = -window.innerWidth / 2;
+  dirLight.shadow.camera.right = window.innerWidth / 2;
+  dirLight.shadow.camera.top = window.innerWidth;
+  dirLight.shadow.camera.bottom = -window.innerWidth;
+  dirLight.name = "Direction Light P";
   dirLight.shadow.radius = 3;
   scene.add(dirLight);
 }

@@ -37,10 +37,7 @@ export async function buildWordPlans(scene, width, height) {
 
   scene.add(primaryPlan);
 
-  let secundaryPlanGeometry = new THREE.PlaneGeometry(
-    window.innerWidth * 0.5,
-    window.innerHeight * 0.5
-  );
+  let secundaryPlanGeometry = new THREE.PlaneGeometry(width, height);
   let secundaryPlanMaterial = new THREE.MeshBasicMaterial({ color: "red" });
   let secundaryPlan = new THREE.Mesh(
     secundaryPlanGeometry,
