@@ -53,6 +53,14 @@ const buildSkyBox = async () => {
   return texture;
 };
 
+
+var textureLoaderRebatedor = new THREE.TextureLoader();
+var textureRebatedor = textureLoaderRebatedor.load('./utils/zebra.jpg'); // Substitua pelo caminho da sua textura
+
+// Criar o Material com a Textura
+var texturedMaterialRebatedor = new THREE.MeshPhongMaterial({ map: textureRebatedor });
+
+
 scene.background = await buildSkyBox();
 
 //scene.background = new THREE.Color("red"); //0xf0f0f0);
@@ -136,7 +144,7 @@ cylinderCSG = CSG.fromMesh(cylinderMesh);
 
 csgObject = cubeCSG.intersect(cylinderCSG);
 mesh2 = CSG.toMesh(csgObject, auxMat);
-mesh2.material = new THREE.MeshLambertMaterial({ color: "green" });
+mesh2.material = texturedMaterialRebatedor;
 
 // Aplica transformações ao mesh2 (plataforma)
 mesh2.position.set(3, 0, 10); // Posição inicial
@@ -173,7 +181,11 @@ function updateObject(mesh) {
 let newBallRadius = 0.02 * primaryPlanGeometry.parameters.width;
 const ball = new THREE.Mesh(
   new THREE.SphereGeometry(newBallRadius),
-  new THREE.MeshPhongMaterial({ color: 0xff0000 })
+  new THREE.MeshPhongMaterial({
+    color: 0xff0000, // Cor da bolinha
+    specular: 0xffffff, // Cor do brilho especular, geralmente branco
+    shininess: 30 // Intensidade do brilho, ajuste conforme necessário
+  })
 );
 
 scene.add(ball);
@@ -324,7 +336,12 @@ let clonedBallVelocity;
 function duplicateBall() {
   clonedBall = new THREE.Mesh(
     new THREE.SphereGeometry(newBallRadius),
-    new THREE.MeshPhongMaterial({ color: 0x808080 })
+    new THREE.MeshPhongMaterial(
+      {
+        color:  0x808080, // Cor da bolinha
+        specular: 0xffffff, // Cor do brilho especular, geralmente branco
+        shininess: 30 // Intensidade do brilho, ajuste conforme necessário
+      })
   );
   clonedBall.castShadow = true;
   scene.add(clonedBall);

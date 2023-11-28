@@ -11,6 +11,12 @@ import {
 } from "../libs/util/util.js";
 
 import { CSG } from "../libs/other/CSGMesh.js";
+var textureLoader = new THREE.TextureLoader();
+var texture = textureLoader.load('./utils/zebra.png'); // Substitua pelo caminho da sua textura
+
+// Criar o Material com a Textura
+var texturedMaterial = new THREE.MeshPhongMaterial({ map: texture });
+
 
 var scene = new THREE.Scene();
 var stats = new Stats();
@@ -72,7 +78,7 @@ function buildObjects() {
 
   csgObject = cubeCSG.intersect(cylinderCSG);
   mesh2 = CSG.toMesh(csgObject, auxMat);
-  mesh2.material = new THREE.MeshLambertMaterial({ color: "green" });
+  mesh2.material = texturedMaterial;
 
   mesh2.position.set(3, 0, 10);
   mesh2.scale.set(0.5, 0.5, 0.5);
