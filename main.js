@@ -18,7 +18,6 @@ import {
 } from "./src/collisions.js";
 
 import KeyboardState from "./libs/util/KeyboardState.js";
-import { initRenderer } from "./libs/util/util.js";
 
 import { buildWordPlans, buildWorldWalls } from "./src/buildWorld.js";
 import { buildBricks } from "./src/bricks.js";
@@ -56,9 +55,25 @@ const buildSkyBox = async () => {
 
 scene.background = await buildSkyBox();
 
+function initRenderer(color = "rgb(0, 0, 0)") {
+  //var props = (typeof additionalProperties !== 'undefined' && additionalProperties) ? additionalProperties : {};
+  var renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMapSoft = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  renderer.setClearColor(new THREE.Color(color));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  document.getElementById("webgl-output").appendChild(renderer.domElement);
+
+  return renderer;
+}
+
 //scene.background = new THREE.Color("red"); //0xf0f0f0);
 renderer = initRenderer();
 renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setA = true;
 let distanciaPlanoPrimarioZ = 10;
 
 let height = window.innerHeight;
