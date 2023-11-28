@@ -64,7 +64,7 @@ let height = window.innerHeight;
 let width = window.innerWidth;
 let aspect = width / height;
 
-let position = new THREE.Vector3(5, -81, height / 2);
+let position = new THREE.Vector3(5, -81, height / 1.75);
 camera = cameraInit(height, width, position);
 orbit = new OrbitControls(camera, renderer.domElement);
 const { primary, second } = await buildWordPlans(scene, width, height);
@@ -486,15 +486,15 @@ function animate() {
 
 // Criação Raycaster
 let raycaster = new THREE.Raycaster();
-
-window.addEventListener("mousemove", onMouseMove, false);
+var touch = new THREE.Vector2();
+window.addEventListener("touch", onMouseMove, false);
 function onMouseMove(event) {
   if (!isPaused) {
-    let mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    let touch = new THREE.Vector2();
+    touch.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+    touch.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
 
-    raycaster.setFromCamera(mouse, camera);
+    raycaster.setFromCamera(touch, camera);
 
     let intersects = raycaster.intersectObjects([primaryPlan, secundaryPlan]);
 
@@ -667,7 +667,7 @@ function keyboardUpdate() {
 }
 
 let initialTime;
-document.addEventListener("click", function () {
+document.addEventListener("touchstart", function () {
   start = true;
   initialTime = Date.now() / 1000;
 });
