@@ -5,7 +5,7 @@ let lastCollisionTimePlatform = 0;
 const collisionCooldownPlatform = 100;
 // Função para verificar colisão da bola com a platforma
 
-const rebatedorSound = new Audio("./assets/sounds/rebatedor.mp3");
+//const rebatedorSound = new Audio("./lib/sounds/rebatedor.mp3");
 
 export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
   platform.geometry.computeBoundingBox();
@@ -22,7 +22,7 @@ export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
   let bbRebatedor = new THREE.Box3().setFromObject(platform);
 
   if (bbBall.intersectsBox(bbRebatedor)) {
-    new Audio("../assets/sounds/rebatedor.mp3").play();
+    new Audio("./utils/sounds/rebatedor.mp3").play();
     const currentTime = performance.now();
 
     // Verifique se o tempo atual é maior que o 'lastCollisionTimePlatform' mais o período de 'collisionCooldownPlatform'.

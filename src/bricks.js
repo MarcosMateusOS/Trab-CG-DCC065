@@ -1,5 +1,4 @@
-import * as THREE from 'three';
-
+import * as THREE from "three";
 
 const textureLoader = new THREE.TextureLoader();
 
@@ -11,7 +10,7 @@ export default function addBrick(size, position, color, isTextured = false) {
   let material;
 
   if (isTextured) {
-    const texture = textureLoader.load('./utils/tijolo.jpg');
+    const texture = textureLoader.load("./utils/tijolo.jpg");
     material = new THREE.MeshPhongMaterial({ map: texture });
   } else {
     material = new THREE.MeshPhongMaterial({ color: color });
@@ -22,7 +21,7 @@ export default function addBrick(size, position, color, isTextured = false) {
   brick.position.set(position.x, position.y, position.z);
   brick.scale.set(width, height, 1);
   brick.castShadow = true;
-  brick.isTextured = isTextured; 
+  brick.isTextured = isTextured;
 
   if (color === "#BCBBBC") brick.hitCount = 1;
   else brick.hitCount = 0;
@@ -32,17 +31,15 @@ export default function addBrick(size, position, color, isTextured = false) {
 
 export function handleBrick(brick, count) {
   if (brick.hitCount > 0) {
-    new Audio('../assets/sounds/bloco2.mp3').play();
+    new Audio("./utils/sounds/bloco2.mp3").play();
     if (brick.isTextured) {
-      
-      brick.material = new THREE.MeshPhongMaterial({ color: '#664a49' });
+      brick.material = new THREE.MeshPhongMaterial({ color: "#664a49" });
     } else {
       brick.material.color = new THREE.Color("#888888");
     }
     brick.hitCount--;
   } else {
-
-    new Audio('../assets/sounds/bloco1.mp3').play();
+    new Audio("./utils/sounds/bloco1.mp3").play();
     brick.position.set(1000, 1000, 1000);
     brick.visible = false;
 
@@ -104,7 +101,7 @@ export function buildBricks(plan, currentLevel) {
           };
 
           let color = colors[indexRow];
-          let isTextured = color === "#BCBBBC"; 
+          let isTextured = color === "#BCBBBC";
 
           bricks.push(addBrick(size, position, color, isTextured));
         }
@@ -121,7 +118,7 @@ export function buildBricks(plan, currentLevel) {
           };
 
           let color = colors[brick - 1];
-          let isTextured = color === "#BCBBBC"; 
+          let isTextured = color === "#BCBBBC";
 
           bricks.push(addBrick(size, position, color, isTextured));
         }
