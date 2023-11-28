@@ -487,7 +487,7 @@ function animate() {
 // Criação Raycaster
 let raycaster = new THREE.Raycaster();
 var touch = new THREE.Vector2();
-window.addEventListener("touch", onMouseMove, false);
+window.addEventListener("touchmove", onMouseMove, false);
 function onMouseMove(event) {
   if (!isPaused) {
     let touch = new THREE.Vector2();
