@@ -491,8 +491,8 @@ window.addEventListener("touchmove", onMouseMove, false);
 function onMouseMove(event) {
   if (!isPaused) {
     let touch = new THREE.Vector2();
-    touch.x = (event.targetTouches[0].pageX / window.innerWidth) * 2 - 1;
-    touch.y = -(event.targetTouches[0].pagey / window.innerHeight) * 2 + 1;
+    touch.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+    touch.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(touch, camera);
 
