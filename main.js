@@ -30,7 +30,8 @@ import {
   CubeTextureLoader,
   Vector3,
 } from "./build/three.module.js";
-
+import { Buttons } from "./libs/other/buttons.js";
+var buttons = new Buttons(onButtonDown);
 var count = { score: 0 };
 var currentLevel = 1;
 
@@ -611,6 +612,7 @@ function resetGame() {
   );
   powerUp.position.set(randX, yOffset + 400, distanciaPlanoPrimarioZ);
   powerUp.visible = false;
+  resetButton();
 
   if (isPaused) {
     resume();
@@ -632,45 +634,38 @@ function fullScreen() {
   }
 }
 
-function keyboardUpdate() {
-  keyboard.update();
+function resetButton() {
+  var botao = document.getElementById("shot");
+  if (start) {
+    // Altera a propriedade do botão, por exemplo, o texto
+    botao.style.display = "none";
+  } else {
+    botao.style.display = "block";
+  }
+}
 
-  if (keyboard.down("R")) {
-    currentLevel = 1;
-    resetGame();
+let pressedShot = false;
+function onButtonDown(event) {
+  console.log(event.target.id);
+  switch (event.target.id) {
+    case "shot":
+      start = true;
+      initialTime = Date.now() / 1000;
+      resetButton();
+      break;
+    case "reset":
+      currentLevel = 1;
+      resetGame();
+      break;
+    case "full":
+      buttons.setFullScreen();
+      break;
   }
 
-  if (keyboard.down("G")) {
-    currentLevel = 2;
-    resetGame();
-  }
-
-  if (keyboard.down("space")) {
-    if (!isPaused) {
-      pause();
-    } else {
-      resume();
-    }
-  }
-
-  if (keyboard.down("O")) {
-    if (!enableOrbit) {
-      orbit.enabled = true;
-      enableOrbit = true;
-    } else {
-      orbit.enabled = false;
-      enableOrbit = false;
-    }
-  }
-
-  if (keyboard.down("enter")) fullScreen();
+  //if (keyboard.down("enter")) fullScreen();
 }
 
 let initialTime;
-document.addEventListener("touchstart", function () {
-  start = true;
-  initialTime = Date.now() / 1000;
-});
 
 // Adicionando luz
 renderer.shadowMap.enabled = true;
@@ -743,7 +738,6 @@ loadSpaceship();
 
 render();
 function render() {
-  keyboardUpdate();
   animate();
   positionSpaceshipOnPaddle();
   requestAnimationFrame(render);
