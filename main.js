@@ -202,9 +202,9 @@ let newBallRadius = 0.02 * primaryPlanGeometry.parameters.width;
 const ball = new THREE.Mesh(
   new THREE.SphereGeometry(newBallRadius),
   new THREE.MeshPhongMaterial({
-    color: 0xff0000, // Cor da bolinha
-    specular: 0xffffff, // Cor do brilho especular, geralmente branco
-    shininess: 30, // Intensidade do brilho, ajuste conforme necessário
+    color: 0xff0000, 
+    specular: 0xffffff, 
+    shininess: 30, 
   })
 );
 
@@ -853,14 +853,13 @@ function setUVCoordinates(geometry) {
     const y = vertices[i * 3 + 1];
     const z = vertices[i * 3 + 2];
 
-    // Calcular coordenadas polares
+
     const radius = Math.sqrt(x * x + y * y);
     const angle = Math.atan2(y, x);
 
-    // Mapeamento UV baseado na posição dos vértices
-    // Assegurar que as coordenadas UV estejam no primeiro quadrante
-    const u = ((angle / (2 * Math.PI)) + 0.5) / 1.5; // Normaliza o ângulo para o intervalo [0, 0.5]
-    const v = radius / 1.25; // Normaliza o raio para o intervalo [0, 0.5]
+
+    const u = ((angle / (2 * Math.PI)) + 0.5) / 1.5; 
+    const v = radius / 1.25;
 
     uv.push(u, v);
   }
