@@ -516,6 +516,12 @@ function animate() {
 
       if (count.score === 224 && currentLevel === 2) {
         count.score = 0;
+        currentLevel = 3;
+        resetGame();
+      }
+
+      if (count.score === 61 && currentLevel === 3) {
+        count.score = 0;
         currentLevel = 1;
         resetGame();
       }
@@ -686,6 +692,11 @@ function keyboardUpdate() {
 
   if (keyboard.down("G")) {
     currentLevel = 2;
+    resetGame();
+  }
+
+  if (keyboard.down("H")) {
+    currentLevel = 3;
     resetGame();
   }
 

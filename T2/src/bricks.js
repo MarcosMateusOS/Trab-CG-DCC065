@@ -24,9 +24,11 @@ export function handleBrick(brick, count) {
     brick.hitCount--;
   } else {
     // Move o tijolo para fora da cena e o torna invisível
-    brick.position.set(1000, 1000, 1000);
-    brick.visible = false;
-
+    if (brick.hitCount === 0) {
+      console.log(brick.hitCount);
+      brick.position.set(1000, 1000, 1000);
+      brick.visible = false;
+    }
     count.score++;
   }
 }
@@ -58,6 +60,20 @@ export function buildBricks(plan, currentLevel) {
     [5, 6, 4, 1, 0, 6, 4, 2, 5],
   ];
 
+  const level3 = [
+    [3, 0, 2, 0, 6, 0, 6, 0, 2, 0, 3],
+    [3, 0, 2, 0, 6, 0, 6, 0, 2, 0, 3],
+    [3, 0, 2, 0, 6, 0, 6, 0, 2, 0, 3],
+    [3, 0, 7, 5, 7, 5, 7, 5, 7, 0, 3],
+    [3, 0, 2, 0, 6, 0, 6, 0, 2, 0, 3],
+    [3, 0, 2, 0, 6, 0, 6, 0, 2, 0, 3],
+    [3, 0, 2, 0, 6, 0, 6, 0, 2, 0, 3],
+    [3, 0, 2, 0, 6, 0, 6, 0, 2, 0, 3],
+    [3, 0, 2, 0, 6, 0, 6, 0, 2, 0, 3],
+    [5, 0, 7, 0, 7, 0, 7, 0, 7, 0, 5],
+    [3, 0, 2, 0, 6, 0, 6, 0, 2, 0, 3],
+  ];
+
   const colors = [
     //         // vazio     - 0
     "#BCBBBC", // cinza     - 1
@@ -66,6 +82,7 @@ export function buildBricks(plan, currentLevel) {
     "#FB9737", // laranja   - 4
     "#FC74B4", // rosa      - 5
     "#80D010", // verde     - 6
+    "#E8B63A", // dourado   - 7
   ];
 
   const bricks = [];
@@ -91,8 +108,9 @@ export function buildBricks(plan, currentLevel) {
         }
       });
     });
-  } else if (currentLevel === 2) {
-    level2.forEach((row, indexRow) => {
+  } else if (currentLevel === 2 || currentLevel === 3) {
+    console.log("level: ", currentLevel);
+    (currentLevel === 2 ? level2 : level3).forEach((row, indexRow) => {
       row.forEach((brick, indexBrick) => {
         if (brick !== 0) {
           let position = {

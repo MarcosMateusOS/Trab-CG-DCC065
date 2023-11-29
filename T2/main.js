@@ -88,7 +88,7 @@ let auxMat = new THREE.Matrix4();
 let cubeMesh = new THREE.Mesh(
   new THREE.BoxGeometry(2, 2, 2),
   new THREE.MeshPhongMaterial({ color: "red" })
-); 
+);
 let cylinderMesh = new THREE.Mesh(
   new THREE.CylinderGeometry(0.85, 0.85, 2, 17),
   new THREE.MeshPhongMaterial({ color: "blue" })
@@ -615,6 +615,11 @@ function keyboardUpdate() {
 
   if (keyboard.down("G")) {
     currentLevel = 2;
+    resetGame();
+  }
+
+  if (keyboard.down("H")) {
+    currentLevel = 3;
     resetGame();
   }
 
