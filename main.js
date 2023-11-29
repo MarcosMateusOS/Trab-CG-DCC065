@@ -690,6 +690,8 @@ function resetButton() {
   var botao = document.getElementById("shot");
   if (start) {
     botao.style.display = "none";
+  } else {
+    botao.style.display = "block";
   }
 }
 
