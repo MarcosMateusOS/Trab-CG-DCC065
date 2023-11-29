@@ -34,6 +34,7 @@ import { Buttons } from "../libs/other/buttons.js";
 var buttons = new Buttons(onButtonDown);
 var count = { score: 0 };
 var currentLevel = 1;
+var lives = 5;
 
 let scene, renderer, camera, orbit;
 var mainScene = new THREE.Scene();
@@ -230,6 +231,12 @@ buildBricksPlan();
 
 let ballEnergyMesh;
 
+function removeLife() {
+  console.log("lives: ", lives);
+  lives--;
+  resetGame();
+}
+
 const font = await new FontLoader().loadAsync("./utils/font/gamefont.json");
 
 let textVelocity = `Speed: ${newBallVelocity.toFixed(2)}`;
@@ -238,7 +245,7 @@ const textVelocityGeometry = new TextGeometry(textVelocity, {
   size: 15,
   height: 1,
 });
-const textVelocityMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+const textVelocityMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
 const textVelocityMesh = new THREE.Mesh(
   textVelocityGeometry,
   textVelocityMaterial
@@ -252,12 +259,20 @@ textVelocityMesh.name = "textVelocity";
 scene.add(textVelocityMesh);
 
 let textScore = `Score: ${count.score}`;
+let textLives = `x${lives}`;
+
 const textScoreGeometry = new TextGeometry(textScore, {
   font: font,
   size: 15,
   height: 1,
 });
-const textScoreMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+const textLivesGeometry = new TextGeometry(textLives, {
+  font: font,
+  size: 15,
+  height: 1,
+});
+
+const textScoreMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
 const textScoreMesh = new THREE.Mesh(textScoreGeometry, textScoreMaterial);
 textScoreMesh.position.set(
   wallLeft.position.x + 35,
@@ -265,7 +280,17 @@ textScoreMesh.position.set(
   30
 );
 textScoreMesh.name = "textScore";
+
+const textLivesMesh = new THREE.Mesh(textLivesGeometry, textScoreMaterial);
+textLivesMesh.position.set(
+  wallLeft.position.x + 35,
+  wallBottom.position.y + 90,
+  30
+);
+textLivesMesh.name = "textLives";
+
 scene.add(textScoreMesh);
+scene.add(textLivesMesh);
 
 function updateInfos() {
   textVelocity = `Speed: ${newBallVelocity.toFixed(2)}`;
@@ -281,6 +306,15 @@ function updateInfos() {
   const textoScoreMesh = scene.getObjectByName("textScore");
   textoScoreMesh.geometry.dispose();
   textoScoreMesh.geometry = new TextGeometry(textScore, {
+    font: font,
+    size: 15,
+    height: 1,
+  });
+
+  textLives = `x${lives}`;
+  const textoLivesMesh = scene.getObjectByName("textLives");
+  textoLivesMesh.geometry.dispose();
+  textoLivesMesh.geometry = new TextGeometry(textLives, {
     font: font,
     size: 15,
     height: 1,
@@ -476,13 +510,15 @@ function animate() {
       ball.position.x += ballVelocity.x;
       ball.position.y += ballVelocity.y;
       checkPlatformCollision(mesh2, ball, ballVelocity, scene);
+
       const isLose = checkBordersCollision(
         wallLeft,
         wallRigth,
         wallBottom,
         wallTop,
         ball,
-        ballVelocity
+        ballVelocity,
+        removeLife
       );
 
       if (isLose) {

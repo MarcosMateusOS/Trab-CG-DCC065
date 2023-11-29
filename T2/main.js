@@ -31,6 +31,7 @@ import {
 
 var count = { score: 0 };
 var currentLevel = 1;
+var lives = 5;
 
 let scene, renderer, camera;
 scene = new THREE.Scene();
@@ -214,11 +215,19 @@ textVelocityMesh.name = "textVelocity";
 scene.add(textVelocityMesh);
 
 let textScore = `Score: ${count.score}`;
+let textLives = `x${lives}`;
+
 const textScoreGeometry = new TextGeometry(textScore, {
   font: font,
   size: 15,
   height: 1,
 });
+const textLivesGeometry = new TextGeometry(textLives, {
+  font: font,
+  size: 15,
+  height: 1,
+});
+
 const textScoreMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
 const textScoreMesh = new THREE.Mesh(textScoreGeometry, textScoreMaterial);
 textScoreMesh.position.set(
@@ -227,7 +236,17 @@ textScoreMesh.position.set(
   30
 );
 textScoreMesh.name = "textScore";
+
+const textLivesMesh = new THREE.Mesh(textLivesGeometry, textScoreMaterial);
+textLivesMesh.position.set(
+  wallLeft.position.x + 35,
+  wallBottom.position.y + 90,
+  30
+);
+textLivesMesh.name = "textLives";
+
 scene.add(textScoreMesh);
+scene.add(textLivesMesh);
 
 function updateInfos() {
   textVelocity = `Speed: ${newBallVelocity.toFixed(2)}`;
@@ -421,6 +440,7 @@ function animate() {
       currentLevel = 1;
       resetGame();
     }
+
     bricks.forEach((brick) => {
       checkBrickCollision(brick, ball, ballVelocity, count);
       if (clonedBall) {

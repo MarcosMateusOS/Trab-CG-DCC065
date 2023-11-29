@@ -39,6 +39,7 @@ export function handleBrick(brick, count) {
       brick.material.color = new THREE.Color("#888888");
     }
     brick.hitCount--;
+    count.score++;
   } else {
     new Audio("../assets/sounds/bloco1.mp3").play();
 
@@ -46,9 +47,8 @@ export function handleBrick(brick, count) {
       console.log(brick.hitCount);
       brick.position.set(1000, 1000, 1000);
       brick.visible = false;
+      count.score++;
     }
-
-    count.score++;
   }
 }
 
