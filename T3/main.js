@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { TextGeometry } from "../build/jsm/geometries/TextGeometry.js";
 import { FontLoader } from "../build/jsm/loaders/FontLoader.js";
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import GUI from "../libs/util/dat.gui.module.js";
 import cameraInit from "./src/camera.js";
 
@@ -30,12 +30,13 @@ import {
   CubeTextureLoader,
   Vector3,
 } from "../build/three.module.js";
-
+import { Buttons } from "../libs/other/buttons.js";
+var buttons = new Buttons(onButtonDown);
 var count = { score: 0 };
 var currentLevel = 1;
 
 let scene, renderer, camera, orbit;
-
+var mainScene = new THREE.Scene();
 scene = new THREE.Scene();
 
 const buildSkyBox = async () => {
@@ -53,13 +54,13 @@ const buildSkyBox = async () => {
   return texture;
 };
 
-
 var textureLoaderRebatedor = new THREE.TextureLoader();
-var textureRebatedor = textureLoaderRebatedor.load('./utils/zebra.jpg'); // Substitua pelo caminho da sua textura
+var textureRebatedor = textureLoaderRebatedor.load("./utils/zebra.jpg"); // Substitua pelo caminho da sua textura
 
 // Criar o Material com a Textura
-var texturedMaterialRebatedor = new THREE.MeshPhongMaterial({ map: textureRebatedor });
-
+var texturedMaterialRebatedor = new THREE.MeshPhongMaterial({
+  map: textureRebatedor,
+});
 
 scene.background = await buildSkyBox();
 
@@ -184,7 +185,7 @@ const ball = new THREE.Mesh(
   new THREE.MeshPhongMaterial({
     color: 0xff0000, // Cor da bolinha
     specular: 0xffffff, // Cor do brilho especular, geralmente branco
-    shininess: 30 // Intensidade do brilho, ajuste conforme necessário
+    shininess: 30, // Intensidade do brilho, ajuste conforme necessário
   })
 );
 
@@ -336,12 +337,11 @@ let clonedBallVelocity;
 function duplicateBall() {
   clonedBall = new THREE.Mesh(
     new THREE.SphereGeometry(newBallRadius),
-    new THREE.MeshPhongMaterial(
-      {
-        color:  0x808080, // Cor da bolinha
-        specular: 0xffffff, // Cor do brilho especular, geralmente branco
-        shininess: 30 // Intensidade do brilho, ajuste conforme necessário
-      })
+    new THREE.MeshPhongMaterial({
+      color: 0x808080, // Cor da bolinha
+      specular: 0xffffff, // Cor do brilho especular, geralmente branco
+      shininess: 30, // Intensidade do brilho, ajuste conforme necessário
+    })
   );
   clonedBall.castShadow = true;
   scene.add(clonedBall);
@@ -396,6 +396,25 @@ function putPowerUp() {
   duplicateBall();
 }
 
+async function renderSceneStart() {
+  mainScene = scene;
+}
+function removeStartButton() {
+  const botao = document.getElementById("start");
+  botao.style.display = "none";
+}
+
+function onButtonDown(event) {
+  switch (event.target.id) {
+    case "start":
+      startFromMenu = true;
+      removeStartButton();
+      break;
+  }
+
+  //if (keyboard.down("enter")) fullScreen();
+}
+
 let lastScore = 0;
 function checkScore() {
   if (count.score < 10) {
@@ -410,92 +429,100 @@ function checkScore() {
 }
 // animação bola
 let checkTime = 0;
-
+let callRender = false;
 function animate() {
-  if (isPaused) return;
-  updateInfos();
-  if (start) {
-    countPowerUp = count.score;
-    lastScore = count.score - 1;
-    checkTime += 1 / 60;
-
-    if (checkTime <= 15) {
-      newBallVelocity = initialBallVelocity;
-      newBallVelocity = newBallVelocity + (checkTime / 15) * newBallVelocity;
-
-      ballVelocity.normalize();
-      ballVelocity.multiplyScalar(newBallVelocity);
+  if (startFromMenu) {
+    if (!callRender) {
+      renderSceneStart();
+      callRender = true;
+      animate();
+      return;
     }
+    if (isPaused) return;
+    updateInfos();
+    if (start) {
+      countPowerUp = count.score;
+      lastScore = count.score - 1;
+      checkTime += 1 / 60;
 
-    if (clonedBall) {
-      checkPlatformCollision(mesh2, clonedBall, clonedBallVelocity);
+      if (checkTime <= 15) {
+        newBallVelocity = initialBallVelocity;
+        newBallVelocity = newBallVelocity + (checkTime / 15) * newBallVelocity;
 
-      clonedBall.position.x += clonedBallVelocity.x;
-      clonedBall.position.y += clonedBallVelocity.y;
+        ballVelocity.normalize();
+        ballVelocity.multiplyScalar(newBallVelocity);
+      }
 
+      if (clonedBall) {
+        checkPlatformCollision(mesh2, clonedBall, clonedBallVelocity);
+
+        clonedBall.position.x += clonedBallVelocity.x;
+        clonedBall.position.y += clonedBallVelocity.y;
+
+        const isLose = checkBordersCollision(
+          wallLeft,
+          wallRigth,
+          wallBottom,
+          wallTop,
+          clonedBall,
+          clonedBallVelocity
+        );
+
+        if (isLose) {
+          removeClonedBall();
+        }
+      }
+
+      ball.position.x += ballVelocity.x;
+      ball.position.y += ballVelocity.y;
+      checkPlatformCollision(mesh2, ball, ballVelocity, scene);
       const isLose = checkBordersCollision(
         wallLeft,
         wallRigth,
         wallBottom,
         wallTop,
-        clonedBall,
-        clonedBallVelocity
+        ball,
+        ballVelocity
       );
 
       if (isLose) {
-        removeClonedBall();
+        currentLevel = 1;
+        resetGame();
       }
-    }
+      bricks.forEach((brick) => {
+        checkBrickCollision(brick, ball, ballVelocity, count);
+        if (clonedBall) {
+          checkBrickCollision(brick, clonedBall, clonedBallVelocity, count);
+        }
+      });
 
-    ball.position.x += ballVelocity.x;
-    ball.position.y += ballVelocity.y;
-    checkPlatformCollision(mesh2, ball, ballVelocity, scene);
-    const isLose = checkBordersCollision(
-      wallLeft,
-      wallRigth,
-      wallBottom,
-      wallTop,
-      ball,
-      ballVelocity
-    );
-
-    if (isLose) {
-      currentLevel = 1;
-      resetGame();
-    }
-    bricks.forEach((brick) => {
-      checkBrickCollision(brick, ball, ballVelocity, count);
-      if (clonedBall) {
-        checkBrickCollision(brick, clonedBall, clonedBallVelocity, count);
+      if (checkScore() && isActivePowerUp) {
+        showPowerUp();
       }
-    });
 
-    if (checkScore() && isActivePowerUp) {
-      showPowerUp();
-    }
+      if (checkPowerUpCollsion(mesh2, powerUp)) {
+        putPowerUp();
+      }
 
-    if (checkPowerUpCollsion(mesh2, powerUp)) {
-      putPowerUp();
-    }
+      if (checkPowerUpIsInDestination(wallBottom, powerUp)) {
+        resetPowerUp();
+      }
 
-    if (checkPowerUpIsInDestination(wallBottom, powerUp)) {
-      resetPowerUp();
-    }
+      if (count.score === 66 && currentLevel === 1) {
+        count.score = 0;
+        currentLevel = 2;
+        resetGame();
+      }
 
-    if (count.score === 66 && currentLevel === 1) {
-      count.score = 0;
-      currentLevel = 2;
-      resetGame();
-    }
+      if (count.score === 224 && currentLevel === 2) {
+        count.score = 0;
+        currentLevel = 1;
+        resetGame();
+      }
 
-    if (count.score === 224 && currentLevel === 2) {
-      count.score = 0;
-      currentLevel = 1;
-      resetGame();
-    }
-
-    if (lerpConfig.move) {
-      powerUp.position.lerp(lerpConfig.destination, lerpConfig.alpha);
+      if (lerpConfig.move) {
+        powerUp.position.lerp(lerpConfig.destination, lerpConfig.alpha);
+      }
     }
   }
 }
@@ -723,53 +750,40 @@ function setDirectionalLighting(position) {
 
 function positionSpaceshipOnPaddle() {
   if (spaceship && mesh2) {
-      
-      spaceship.position.x = mesh2.position.x;
-      spaceship.position.y = mesh2.position.y - 90;
-      spaceship.position.z = mesh2.position.z;
+    spaceship.position.x = mesh2.position.x;
+    spaceship.position.y = mesh2.position.y - 90;
+    spaceship.position.z = mesh2.position.z;
   }
 }
-
 
 let spaceship;
 
 const loadSpaceship = async () => {
   const loader = new GLTFLoader();
-  const gltf = await loader.loadAsync('./utils/nave.glb');
+  const gltf = await loader.loadAsync("./utils/nave.glb");
   spaceship = gltf.scene;
 
-  
-  const grayColor = new THREE.Color(0x808080); 
+  const grayColor = new THREE.Color(0x808080);
 
-  
   spaceship.traverse((child) => {
-      if (child.isMesh) {
-        child.material = new THREE.MeshPhongMaterial({
-          color: grayColor,
-          shininess: 100 
-        });
-      }
+    if (child.isMesh) {
+      child.material = new THREE.MeshPhongMaterial({
+        color: grayColor,
+        shininess: 100,
+      });
+    }
   });
 
-  
+  spaceship.scale.set(7, 7, 7);
 
-  
-  spaceship.scale.set(7, 7, 7); 
-
-  
   positionSpaceshipOnPaddle();
   spaceship.rotation.y = 270 * (Math.PI / 180);
   spaceship.rotation.z = 270 * (Math.PI / 180);
-  
- 
+
   scene.add(spaceship);
 };
-
+let startFromMenu = false;
 loadSpaceship();
-
-
-
-
 
 render();
 function render() {
@@ -777,5 +791,5 @@ function render() {
   animate();
   positionSpaceshipOnPaddle();
   requestAnimationFrame(render);
-  renderer.render(scene, camera);
+  renderer.render(mainScene, camera);
 }
