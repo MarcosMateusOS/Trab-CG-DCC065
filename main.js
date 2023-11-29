@@ -29,10 +29,13 @@ import {
   CubeTextureLoader,
   Vector3,
 } from "./build/three.module.js";
+
 import { Buttons } from "./libs/other/buttons.js";
 var buttons = new Buttons(onButtonDown);
 var count = { score: 0 };
 var currentLevel = 1;
+
+var mainScene = new THREE.Scene();
 
 let scene, renderer, camera, orbit;
 
@@ -409,93 +412,106 @@ function checkScore() {
 }
 // animação bola
 let checkTime = 0;
-
-function animate() {
-  if (isPaused) return;
-  updateInfos();
-  if (start) {
-    countPowerUp = count.score;
-    lastScore = count.score - 1;
-    checkTime += 1 / 60;
-
-    if (checkTime <= 15) {
-      newBallVelocity = initialBallVelocity;
-      newBallVelocity = newBallVelocity + (checkTime / 15) * newBallVelocity;
-
-      ballVelocity.normalize();
-      ballVelocity.multiplyScalar(newBallVelocity);
+let callRender = false;
+async function renderSceneStart() {
+  mainScene = scene;
+}
+async function animate() {
+  if (startFromMenu) {
+    if (!callRender) {
+      renderSceneStart();
+      callRender = true;
+      animate();
+      return;
     }
+    if (isPaused) return;
+    updateInfos();
+    if (start) {
+      countPowerUp = count.score;
+      lastScore = count.score - 1;
+      checkTime += 1 / 60;
 
-    if (clonedBall) {
-      checkPlatformCollision(mesh2, clonedBall, clonedBallVelocity);
+      if (checkTime <= 15) {
+        newBallVelocity = initialBallVelocity;
+        newBallVelocity = newBallVelocity + (checkTime / 15) * newBallVelocity;
 
-      clonedBall.position.x += clonedBallVelocity.x;
-      clonedBall.position.y += clonedBallVelocity.y;
+        ballVelocity.normalize();
+        ballVelocity.multiplyScalar(newBallVelocity);
+      }
 
+      if (clonedBall) {
+        checkPlatformCollision(mesh2, clonedBall, clonedBallVelocity);
+
+        clonedBall.position.x += clonedBallVelocity.x;
+        clonedBall.position.y += clonedBallVelocity.y;
+
+        const isLose = checkBordersCollision(
+          wallLeft,
+          wallRigth,
+          wallBottom,
+          wallTop,
+          clonedBall,
+          clonedBallVelocity
+        );
+
+        if (isLose) {
+          removeClonedBall();
+        }
+      }
+
+      ball.position.x += ballVelocity.x;
+      ball.position.y += ballVelocity.y;
+      checkPlatformCollision(mesh2, ball, ballVelocity, scene);
       const isLose = checkBordersCollision(
         wallLeft,
         wallRigth,
         wallBottom,
         wallTop,
-        clonedBall,
-        clonedBallVelocity
+        ball,
+        ballVelocity
       );
 
       if (isLose) {
-        removeClonedBall();
+        currentLevel = 1;
+        resetGame();
+      }
+      bricks.forEach((brick) => {
+        checkBrickCollision(brick, ball, ballVelocity, count);
+        if (clonedBall) {
+          checkBrickCollision(brick, clonedBall, clonedBallVelocity, count);
+        }
+      });
+
+      if (checkScore() && isActivePowerUp) {
+        showPowerUp();
+      }
+
+      if (checkPowerUpCollsion(mesh2, powerUp)) {
+        putPowerUp();
+      }
+
+      if (checkPowerUpIsInDestination(wallBottom, powerUp)) {
+        resetPowerUp();
+      }
+
+      if (count.score === 66 && currentLevel === 1) {
+        count.score = 0;
+        currentLevel = 2;
+        resetGame();
+      }
+
+      if (count.score === 224 && currentLevel === 2) {
+        count.score = 0;
+        currentLevel = 1;
+        resetGame();
+      }
+
+      if (lerpConfig.move) {
+        powerUp.position.lerp(lerpConfig.destination, lerpConfig.alpha);
       }
     }
-
-    ball.position.x += ballVelocity.x;
-    ball.position.y += ballVelocity.y;
-    checkPlatformCollision(mesh2, ball, ballVelocity, scene);
-    const isLose = checkBordersCollision(
-      wallLeft,
-      wallRigth,
-      wallBottom,
-      wallTop,
-      ball,
-      ballVelocity
-    );
-
-    if (isLose) {
-      currentLevel = 1;
-      resetGame();
-    }
-    bricks.forEach((brick) => {
-      checkBrickCollision(brick, ball, ballVelocity, count);
-      if (clonedBall) {
-        checkBrickCollision(brick, clonedBall, clonedBallVelocity, count);
-      }
-    });
-
-    if (checkScore() && isActivePowerUp) {
-      showPowerUp();
-    }
-
-    if (checkPowerUpCollsion(mesh2, powerUp)) {
-      putPowerUp();
-    }
-
-    if (checkPowerUpIsInDestination(wallBottom, powerUp)) {
-      resetPowerUp();
-    }
-
-    if (count.score === 66 && currentLevel === 1) {
-      count.score = 0;
-      currentLevel = 2;
-      resetGame();
-    }
-
-    if (count.score === 224 && currentLevel === 2) {
-      count.score = 0;
-      currentLevel = 1;
-      resetGame();
-    }
-
-    if (lerpConfig.move) {
-      powerUp.position.lerp(lerpConfig.destination, lerpConfig.alpha);
-    }
+  } else {
+    console.log("else");
   }
 }
 //fim animação bola
@@ -577,7 +593,10 @@ function handleOrientation(event) {
     console.log("paisagem");
     camera.aspect = width / height;
     camera.position.z = width / 1;
+    //camera.zoom = 1;
+    //camera.fov = 75;
     setDirectionalLightingP(lightPos);
+    renderer.setSize(width, height);
   } else {
     camera.aspect = window.innerHeight / window.innerWidth;
     setDirectionalLighting(lightPos);
@@ -670,15 +689,31 @@ function fullScreen() {
 function resetButton() {
   var botao = document.getElementById("shot");
   if (start) {
-    // Altera a propriedade do botão, por exemplo, o texto
     botao.style.display = "none";
+  }
+}
+
+function loadButtons() {
+  const botao1 = document.getElementById("shot");
+  const botao2 = document.getElementById("reset");
+  const botao3 = document.getElementById("full");
+  const botao4 = document.getElementById("start");
+  if (startFromMenu) {
+    botao1.style.display = "block";
+    botao2.style.display = "block";
+    botao3.style.display = "block";
+    botao4.style.display = "none";
   } else {
-    botao.style.display = "block";
+    botao1.style.display = "none";
+    botao2.style.display = "none";
+    botao3.style.display = "none";
+    botao4.style.display = "block";
   }
 }
 
 let pressedShot = false;
 function onButtonDown(event) {
+  console.log(event.target.id);
   switch (event.target.id) {
     case "shot":
       start = true;
@@ -688,6 +723,10 @@ function onButtonDown(event) {
     case "reset":
       currentLevel = 1;
       resetGame();
+      break;
+    case "start":
+      startFromMenu = true;
+      loadButtons();
       break;
     case "full":
       buttons.setFullScreen();
@@ -783,12 +822,12 @@ const loadSpaceship = async () => {
   scene.add(spaceship);
 };
 
+let startFromMenu = false;
 loadSpaceship();
-
-render();
-function render() {
-  animate();
+await render();
+async function render() {
+  await animate();
   positionSpaceshipOnPaddle();
   requestAnimationFrame(render);
-  renderer.render(scene, camera);
+  renderer.render(mainScene, camera);
 }
