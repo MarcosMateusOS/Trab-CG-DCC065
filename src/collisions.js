@@ -110,7 +110,7 @@ function handleBottomCollision() {
 
   // Cria a mensagem
   const message = document.createElement('div');
-  message.innerHTML = "Você perdeu! <br> Pressione R para reiniciar.";
+  message.innerHTML = "O jogo terminou! <br> Pressione R para reiniciar.";
   message.style.color = 'white';
   message.style.fontSize = '24px';
   message.style.textAlign = 'center';
