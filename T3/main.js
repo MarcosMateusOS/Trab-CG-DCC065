@@ -234,7 +234,22 @@ let ballEnergyMesh;
 function removeLife() {
   console.log("lives: ", lives);
   lives--;
-  resetGame();
+
+  ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
+  newBallVelocity = 0.003 * height;
+  ballVelocity.normalize();
+  ballVelocity.multiplyScalar(newBallVelocity);
+
+  ball.position.set(
+    0,
+    yOffset + mesh2height / 2 - 0.025 * yOffset,
+    distanciaPlanoPrimarioZ
+  );
+
+  start = false;
+
+  return lives === 0;
+  // resetGame();
 }
 
 const font = await new FontLoader().loadAsync("./utils/font/gamefont.json");
@@ -499,10 +514,13 @@ function animate() {
           wallBottom,
           wallTop,
           clonedBall,
-          clonedBallVelocity
+          clonedBallVelocity,
+          removeLife
         );
 
         if (isLose) {
+          currentLevel === 1;
+          resetGame();
           removeClonedBall();
         }
       }
@@ -671,6 +689,7 @@ function resetGame() {
   start = false;
   count.score = 0;
   checkTime = 0;
+  lives = 5;
 
   ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
   newBallVelocity = 0.003 * height;

@@ -87,7 +87,7 @@ export function checkBordersCollision(
 
   if (wallBottomBox.intersectsBox(ballBox)) {
     // return true;
-    removeLife();
+    return removeLife();
   }
 
   return false;

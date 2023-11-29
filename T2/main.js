@@ -576,6 +576,10 @@ function resume() {
   animate();
 }
 
+function retryLevel() {
+  
+}
+
 function resetGame() {
   start = false;
   count.score = 0;
