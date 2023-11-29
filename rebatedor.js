@@ -46,7 +46,7 @@ function buildObjects() {
   //Criação novo rebatedor
   let mesh2;
   let auxMat = new THREE.Matrix4();
-
+  let texture = new THREE.TextureLoader().load('./utils/cdm.png');
   let cubeMesh = new THREE.Mesh(
     new THREE.BoxGeometry(2, 2, 2),
     new THREE.MeshPhongMaterial({ color: "red" })
@@ -72,8 +72,10 @@ function buildObjects() {
 
   csgObject = cubeCSG.intersect(cylinderCSG);
   mesh2 = CSG.toMesh(csgObject, auxMat);
-  mesh2.material = new THREE.MeshLambertMaterial({ color: "green" });
+  setUVCoordinates(mesh2.geometry);
+  mesh2.material = new THREE.MeshPhongMaterial({ map: texture });
 
+    
   mesh2.position.set(3, 0, 10);
   mesh2.scale.set(0.5, 0.5, 0.5);
   mesh2.rotation.y = THREE.MathUtils.degToRad(90);
@@ -82,7 +84,7 @@ function buildObjects() {
   mesh2.position.set(0, 0, 5);
 
   mesh2.scale.set(2.5, 2.5, 5);
-
+     
   // Não é necessário chamar updateObject, pois matrixAutoUpdate é true por padrão
   mesh2.geometry.computeBoundingBox();
   let boundingBox = mesh2.geometry.boundingBox;
@@ -93,6 +95,37 @@ function buildObjects() {
 
   scene.add(mesh2);
 }
+
+function setUVCoordinates(geometry) {
+  const uv = [];
+  const vertices = geometry.attributes.position.array;
+  const numVertices = vertices.length / 3;
+
+  for (let i = 0; i < numVertices; i++) {
+    const x = vertices[i * 3];
+    const y = vertices[i * 3 + 1];
+    const z = vertices[i * 3 + 2];
+
+    // Calcular coordenadas polares
+    const radius = Math.sqrt(x * x + y * y);
+    const angle = Math.atan2(y, x);
+
+    // Mapeamento UV baseado na posição dos vértices
+    // Assegurar que as coordenadas UV estejam no primeiro quadrante
+    const u = ((angle / (2 * Math.PI)) + 0.5) / 1.5; // Normaliza o ângulo para o intervalo [0, 0.5]
+    const v = radius / 1.25; // Normaliza o raio para o intervalo [0, 0.5]
+
+    uv.push(u, v);
+  }
+
+  geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uv), 2));
+}
+
+
+
+
+
+
 
 function updateObject(mesh) {
   mesh.matrixAutoUpdate = false;
