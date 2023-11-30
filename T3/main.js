@@ -55,13 +55,13 @@ const buildSkyBox = async () => {
   return texture;
 };
 
-var textureLoaderRebatedor = new THREE.TextureLoader();
-var textureRebatedor = textureLoaderRebatedor.load("./utils/zebra.jpg"); // Substitua pelo caminho da sua textura
+// var textureLoaderRebatedor = new THREE.TextureLoader();
+// var textureRebatedor = textureLoaderRebatedor.load("./utils/zebra.jpg"); // Substitua pelo caminho da sua textura
 
-// Criar o Material com a Textura
-var texturedMaterialRebatedor = new THREE.MeshPhongMaterial({
-  map: textureRebatedor,
-});
+// // Criar o Material com a Textura
+// var texturedMaterialRebatedor = new THREE.MeshPhongMaterial({
+//   map: textureRebatedor,
+// });
 
 scene.background = await buildSkyBox();
 
@@ -146,7 +146,7 @@ cylinderCSG = CSG.fromMesh(cylinderMesh);
 
 csgObject = cubeCSG.intersect(cylinderCSG);
 mesh2 = CSG.toMesh(csgObject, auxMat);
-mesh2.material = texturedMaterialRebatedor;
+// mesh2.material = texturedMaterialRebatedor;
 
 // Aplica transformações ao mesh2 (plataforma)
 mesh2.position.set(3, 0, 10); // Posição inicial
@@ -516,7 +516,8 @@ function animate() {
           clonedBall,
           clonedBallVelocity,
           removeLife,
-          0
+          0,null
+          ,lives
         );
 
         if (isLose) {
@@ -850,6 +851,40 @@ const loadSpaceship = async () => {
 
   scene.add(spaceship);
 };
+
+let textureRebatedor = new THREE.TextureLoader().load('./utils/cdm.png');
+setUVCoordinates(mesh2.geometry);
+mesh2.material = new THREE.MeshPhongMaterial({ map: textureRebatedor });
+function setUVCoordinates(geometry) {
+  const uv = [];
+  const vertices = geometry.attributes.position.array;
+  const numVertices = vertices.length / 3;
+
+  for (let i = 0; i < numVertices; i++) {
+    const x = vertices[i * 3];
+    const y = vertices[i * 3 + 1];
+    const z = vertices[i * 3 + 2];
+
+    // Calcular coordenadas polares
+    const radius = Math.sqrt(x * x + y * y);
+    const angle = Math.atan2(y, x);
+
+    // Mapeamento UV baseado na posição dos vértices
+    // Assegurar que as coordenadas UV estejam no primeiro quadrante
+    const u = ((angle / (2 * Math.PI)) + 0.5) / 1.5; // Normaliza o ângulo para o intervalo [0, 0.5]
+    const v = radius / 1.25; // Normaliza o raio para o intervalo [0, 0.5]
+
+    uv.push(u, v);
+  }
+
+  geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uv), 2));
+}
+
+
+
+
+
+
 let startFromMenu = false;
 loadSpaceship();
 

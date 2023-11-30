@@ -65,7 +65,9 @@ export function checkBordersCollision(
   ball,
   ballVelocity,
   removeLife,
-  originalBall
+  originalBall,
+  onBottomCollision = handleBottomCollision,
+  lives
 ) {
   const wallLeftBox = new THREE.Box3().setFromObject(wallLeft);
   const ballBox = new THREE.Box3().setFromObject(ball);
@@ -87,7 +89,7 @@ export function checkBordersCollision(
   }
 
   if (wallBottomBox.intersectsBox(ballBox) && originalBall) {
-    // return true;
+    handleBottomCollision(lives);
     return removeLife();
   }
 
@@ -167,3 +169,46 @@ export function checkPowerUpIsInDestination(wallBottom, powerUp) {
 
   return false;
 }
+
+// Função para lidar com a colisão com a wallBottom
+function handleBottomCollision(lives) {
+  if(lives == 1){
+  console.log("teste");
+  // Cria a sobreposição
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.backgroundColor = 'black';
+  overlay.style.display = 'flex';
+  overlay.style.justifyContent = 'center';
+  overlay.style.alignItems = 'center';
+  overlay.style.zIndex = '1000'; // Garante que a sobreposição fique no topo
+
+  // Cria a mensagem
+  const message = document.createElement('div');
+  message.innerHTML = "Você perdeu! <br> Pressione R para reiniciar.";
+  message.style.color = 'white';
+  message.style.fontSize = '24px';
+  message.style.textAlign = 'center';
+
+  // Adiciona a mensagem à sobreposição
+  overlay.appendChild(message);
+
+  // Adiciona a sobreposição ao corpo do documento
+  document.body.appendChild(overlay);
+
+  // Adiciona um ouvinte de evento para reiniciar o jogo
+  window.addEventListener('keydown', function(event) {
+    if (event.key === 'r' || event.key === 'R') {
+      // Reinicia o jogo
+      location.reload();
+    }
+  });
+}
+
+
+}
+
