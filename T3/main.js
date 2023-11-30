@@ -572,7 +572,7 @@ function animate() {
         resetGame();
       }
 
-      if (count.score === 224 && currentLevel === 2) {
+      if (count.score === 112 && currentLevel === 2) {
         count.score = 0;
         currentLevel = 3;
         resetGame();

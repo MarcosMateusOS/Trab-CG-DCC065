@@ -23,15 +23,20 @@ export default function addBrick(size, position, color, isTextured = false) {
   brick.castShadow = true;
   brick.isTextured = isTextured;
 
-  if (color === "#BCBBBC") brick.hitCount = 1;
-  if (color === "#E8B63A") brick.hitCount = 2;
-  else brick.hitCount = 0;
+  if (color === "#BCBBBC") {
+    brick.hitCount = 1;
+} else if (color === "#E8B63A") {
+    brick.hitCount = 2;
+} else {
+    brick.hitCount = 0;
+}
 
   return brick;
 }
 
 export function handleBrick(brick, count) {
   if (brick.hitCount === 1) {
+    console.log("hitCount 1:" + brick.hitCount);
     new Audio("./utils/bloco2.mp3").play();
     if (brick.isTextured) {
       brick.material = new THREE.MeshPhongMaterial({ color: "#664a49" });
@@ -39,11 +44,12 @@ export function handleBrick(brick, count) {
       brick.material.color = new THREE.Color("#888888");
     }
     brick.hitCount--;
-    count.score++;
+    // count.score++;
   } else {
     new Audio("./utils/bloco1.mp3").play();
 
     if (brick.hitCount === 0) {
+      console.log("hitCount 0:" + brick.hitCount);
       console.log(brick.hitCount);
       brick.position.set(1000, 1000, 1000);
       brick.visible = false;
