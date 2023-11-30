@@ -66,7 +66,6 @@ export function checkBordersCollision(
   ballVelocity,
   removeLife,
   originalBall,
-  onBottomCollision = handleBottomCollision,
   lives
 ) {
   const wallLeftBox = new THREE.Box3().setFromObject(wallLeft);

@@ -516,8 +516,8 @@ function animate() {
           clonedBall,
           clonedBallVelocity,
           removeLife,
-          0,null
-          ,lives
+          0,
+          lives
         );
 
         if (isLose) {
@@ -539,7 +539,8 @@ function animate() {
         ball,
         ballVelocity,
         removeLife,
-        1
+        1,
+        lives
       );
 
       if (isLose) {
