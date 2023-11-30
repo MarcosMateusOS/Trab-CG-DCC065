@@ -64,7 +64,8 @@ export function checkBordersCollision(
   wallTop,
   ball,
   ballVelocity,
-  removeLife
+  removeLife,
+  originalBall
 ) {
   const wallLeftBox = new THREE.Box3().setFromObject(wallLeft);
   const ballBox = new THREE.Box3().setFromObject(ball);
@@ -85,7 +86,7 @@ export function checkBordersCollision(
     ballVelocity.y = -ballVelocity.y;
   }
 
-  if (wallBottomBox.intersectsBox(ballBox)) {
+  if (wallBottomBox.intersectsBox(ballBox) && originalBall) {
     // return true;
     return removeLife();
   }

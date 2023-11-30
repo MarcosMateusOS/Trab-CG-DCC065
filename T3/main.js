@@ -515,7 +515,8 @@ function animate() {
           wallTop,
           clonedBall,
           clonedBallVelocity,
-          removeLife
+          removeLife,
+          0
         );
 
         if (isLose) {
@@ -536,7 +537,8 @@ function animate() {
         wallTop,
         ball,
         ballVelocity,
-        removeLife
+        removeLife,
+        1
       );
 
       if (isLose) {
