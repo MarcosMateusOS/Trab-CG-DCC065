@@ -34,6 +34,7 @@ import { Buttons } from "./libs/other/buttons.js";
 var buttons = new Buttons(onButtonDown);
 var count = { score: 0 };
 var currentLevel = 1;
+var lives = 5;
 
 var mainScene = new THREE.Scene();
 
@@ -63,7 +64,6 @@ const buildSkyBox = async () => {
 // var texturedMaterialRebatedor = new THREE.MeshPhongMaterial({
 //   map: textureRebatedor,
 // });
-
 
 scene.background = await buildSkyBox();
 
@@ -202,9 +202,9 @@ let newBallRadius = 0.02 * primaryPlanGeometry.parameters.width;
 const ball = new THREE.Mesh(
   new THREE.SphereGeometry(newBallRadius),
   new THREE.MeshPhongMaterial({
-    color: 0xff0000, 
-    specular: 0xffffff, 
-    shininess: 30, 
+    color: 0xff0000,
+    specular: 0xffffff,
+    shininess: 30,
   })
 );
 
@@ -247,6 +247,28 @@ function removeBricks() {
 
 buildBricksPlan();
 
+function removeLife() {
+  lives--;
+
+  ballVelocity.copy(new THREE.Vector3(0, initialBallVelocity, 0));
+  newBallVelocity = 0.003 * height;
+  ballVelocity.normalize();
+  ballVelocity.multiplyScalar(newBallVelocity);
+
+  ball.position.set(
+    0,
+    yOffset + mesh2height / 2 - 0.025 * yOffset,
+    distanciaPlanoPrimarioZ
+  );
+  var botao = document.getElementById("shot");
+
+  botao.style.display = "flex";
+  start = false;
+
+  return lives === 0;
+  // resetGame();
+}
+
 let ballEnergyMesh;
 
 const font = await new FontLoader().loadAsync("./utils/font/gamefont.json");
@@ -271,7 +293,14 @@ textVelocityMesh.name = "textVelocity";
 scene.add(textVelocityMesh);
 
 let textScore = `Score: ${count.score}`;
+let textLives = `x${lives}`;
 const textScoreGeometry = new TextGeometry(textScore, {
+  font: font,
+  size: 15,
+  height: 1,
+});
+
+const textLivesGeometry = new TextGeometry(textLives, {
   font: font,
   size: 15,
   height: 1,
@@ -285,6 +314,14 @@ textScoreMesh.position.set(
 );
 textScoreMesh.name = "textScore";
 scene.add(textScoreMesh);
+
+const textLivesMesh = new THREE.Mesh(textLivesGeometry, textScoreMaterial);
+textLivesMesh.position.set(
+  wallLeft.position.x + 35,
+  wallBottom.position.y + 90,
+  30
+);
+textLivesMesh.name = "textLives";
 
 function updateInfos() {
   textVelocity = `Speed: ${newBallVelocity.toFixed(2)}`;
@@ -304,7 +341,18 @@ function updateInfos() {
     size: 15,
     height: 1,
   });
+
+  textLives = `x${lives}`;
+  const textoLivesMesh = scene.getObjectByName("textLives");
+  textoLivesMesh.geometry.dispose();
+  textoLivesMesh.geometry = new TextGeometry(textLives, {
+    font: font,
+    size: 15,
+    height: 1,
+  });
 }
+
+scene.add(textLivesMesh);
 
 const textureLoader = new TextureLoader();
 const texture = await textureLoader.loadAsync("./utils/energy.jpg");
@@ -433,6 +481,7 @@ let callRender = false;
 async function renderSceneStart() {
   mainScene = scene;
 }
+
 async function animate() {
   if (startFromMenu) {
     if (!callRender) {
@@ -485,7 +534,10 @@ async function animate() {
         wallBottom,
         wallTop,
         ball,
-        ballVelocity
+        ballVelocity,
+        removeLife,
+        1,
+        lives
       );
 
       if (isLose) {
@@ -511,18 +563,23 @@ async function animate() {
         resetPowerUp();
       }
 
-      if (count.score === 66 && currentLevel === 1) {
+      if (count.score >= 66 && currentLevel === 1) {
         count.score = 0;
         currentLevel = 2;
         resetGame();
       }
 
-      if (count.score === 224 && currentLevel === 2) {
+      if (count.score === 112 && currentLevel === 2) {
+        count.score = 0;
+        currentLevel = 3;
+        resetGame();
+      }
+
+      if (count.score === 61 && currentLevel === 3) {
         count.score = 0;
         currentLevel = 1;
         resetGame();
       }
-
       if (lerpConfig.move) {
         powerUp.position.lerp(lerpConfig.destination, lerpConfig.alpha);
       }
@@ -749,6 +806,9 @@ function onButtonDown(event) {
       break;
     case "full":
       buttons.setFullScreen();
+    case "reload":
+      const botao1 = document.getElementById("reload");
+      botao1.style.display = "none";
       break;
   }
 
@@ -840,7 +900,7 @@ const loadSpaceship = async () => {
 
   scene.add(spaceship);
 };
-let textureRebatedor = new THREE.TextureLoader().load('./utils/cdm.png');
+let textureRebatedor = new THREE.TextureLoader().load("./utils/cdm.png");
 setUVCoordinates(mesh2.geometry);
 mesh2.material = new THREE.MeshPhongMaterial({ map: textureRebatedor });
 function setUVCoordinates(geometry) {
@@ -853,26 +913,20 @@ function setUVCoordinates(geometry) {
     const y = vertices[i * 3 + 1];
     const z = vertices[i * 3 + 2];
 
-
     const radius = Math.sqrt(x * x + y * y);
     const angle = Math.atan2(y, x);
 
-
-    const u = ((angle / (2 * Math.PI)) + 0.5) / 1.5; 
+    const u = (angle / (2 * Math.PI) + 0.5) / 1.5;
     const v = radius / 1.25;
 
     uv.push(u, v);
   }
 
-  geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uv), 2));
+  geometry.setAttribute(
+    "uv",
+    new THREE.BufferAttribute(new Float32Array(uv), 2)
+  );
 }
-
-
-
-
-
-
-
 
 let startFromMenu = false;
 loadSpaceship();

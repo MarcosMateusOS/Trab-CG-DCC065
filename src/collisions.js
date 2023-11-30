@@ -5,7 +5,7 @@ let lastCollisionTimePlatform = 0;
 const collisionCooldownPlatform = 100;
 // Função para verificar colisão da bola com a platforma
 
-//const rebatedorSound = new Audio("./lib/sounds/rebatedor.mp3");
+const rebatedorSound = new Audio("../assets/sounds/rebatedor.mp3");
 
 export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
   platform.geometry.computeBoundingBox();
@@ -22,7 +22,7 @@ export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
   let bbRebatedor = new THREE.Box3().setFromObject(platform);
 
   if (bbBall.intersectsBox(bbRebatedor)) {
-    new Audio("./utils/sounds/rebatedor.mp3").play();
+    new Audio("../assets/sounds/rebatedor.mp3").play();
     const currentTime = performance.now();
 
     // Verifique se o tempo atual é maior que o 'lastCollisionTimePlatform' mais o período de 'collisionCooldownPlatform'.
@@ -63,7 +63,10 @@ export function checkBordersCollision(
   wallBottom,
   wallTop,
   ball,
-  ballVelocity
+  ballVelocity,
+  removeLife,
+  originalBall,
+  lives
 ) {
   const wallLeftBox = new THREE.Box3().setFromObject(wallLeft);
   const ballBox = new THREE.Box3().setFromObject(ball);
@@ -84,8 +87,9 @@ export function checkBordersCollision(
     ballVelocity.y = -ballVelocity.y;
   }
 
-  if (wallBottomBox.intersectsBox(ballBox)) {
-    return true;
+  if (wallBottomBox.intersectsBox(ballBox) && originalBall) {
+    handleBottomCollision(lives);
+    return removeLife();
   }
 
   return false;
@@ -163,4 +167,40 @@ export function checkPowerUpIsInDestination(wallBottom, powerUp) {
   }
 
   return false;
+}
+
+// Função para lidar com a colisão com a wallBottom
+function handleBottomCollision(lives) {
+  if (lives == 1) {
+    // Cria a sobreposição
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.backgroundColor = "black";
+    overlay.style.display = "flex";
+    overlay.style.justifyContent = "center";
+    overlay.style.alignItems = "center";
+    overlay.style.zIndex = "1000"; // Garante que a sobreposição fique no topo
+
+    // Cria a mensagem
+    const message = document.createElement("div");
+    message.innerHTML = "Você perdeu! <br> Clicke na tela para reiniciar.";
+    message.style.color = "white";
+    message.style.fontSize = "24px";
+    message.style.textAlign = "center";
+
+    // Adiciona a mensagem à sobreposição
+    overlay.appendChild(message);
+
+    // Adiciona a sobreposição ao corpo do documento
+    document.body.appendChild(overlay);
+
+    // Adiciona um ouvinte de evento para reiniciar o jogo
+    window.addEventListener("touchstart", function (event) {
+      location.reload();
+    });
+  }
 }
