@@ -22,7 +22,7 @@ export function checkPlatformCollision(platform, ball, ballVelocity, scene) {
   let bbRebatedor = new THREE.Box3().setFromObject(platform);
 
   if (bbBall.intersectsBox(bbRebatedor)) {
-    new Audio("../assets/sounds/rebatedor.mp3").play();
+    new Audio("./utils/rebatedor.mp3").play();
     const currentTime = performance.now();
 
     // Verifique se o tempo atual é maior que o 'lastCollisionTimePlatform' mais o período de 'collisionCooldownPlatform'.

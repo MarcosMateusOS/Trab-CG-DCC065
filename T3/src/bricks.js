@@ -32,7 +32,7 @@ export default function addBrick(size, position, color, isTextured = false) {
 
 export function handleBrick(brick, count) {
   if (brick.hitCount === 1) {
-    new Audio("../assets/sounds/bloco2.mp3").play();
+    new Audio("./utils/bloco2.mp3").play();
     if (brick.isTextured) {
       brick.material = new THREE.MeshPhongMaterial({ color: "#664a49" });
     } else {
@@ -41,7 +41,7 @@ export function handleBrick(brick, count) {
     brick.hitCount--;
     count.score++;
   } else {
-    new Audio("../assets/sounds/bloco1.mp3").play();
+    new Audio("./utils/bloco1.mp3").play();
 
     if (brick.hitCount === 0) {
       console.log(brick.hitCount);
